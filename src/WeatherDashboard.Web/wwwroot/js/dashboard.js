@@ -5,6 +5,7 @@
     if (!root) return;
 
     var dataUrl = root.dataset.dataUrl;
+    var highlightsUrl = root.dataset.highlightsUrl;
     var citySelect = document.getElementById("city-select");
     var startInput = document.getElementById("start-date");
     var endInput = document.getElementById("end-date");
@@ -13,18 +14,43 @@
     var statsGrid = document.getElementById("today-stats");
     var emptyState = document.getElementById("empty-state");
     var chartsGrid = document.querySelector(".charts-grid");
+    var highlightsStrip = document.getElementById("highlights-strip");
+    var dayStripCard = document.getElementById("day-strip-card");
+    var dayStrip = document.getElementById("day-strip");
+    var skyBackdrop = document.getElementById("sky-backdrop");
+    var unitToggle = document.getElementById("unit-toggle");
 
     var temperatureChart = null;
     var humidityWindChart = null;
     var AUTO_REFRESH_MS = 5 * 60 * 1000; // acompanha a coleta de 15 em 15 min sem sobrecarregar o servidor
+    var UNIT_STORAGE_KEY = "climaBrasil.unit";
+
+    var unit = localStorage.getItem(UNIT_STORAGE_KEY) === "F" ? "F" : "C";
+    var lastData = null;
 
     var numberFormatter = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 1 });
     var dayLabelFormatter = new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "2-digit" });
+    var weekdayFormatter = new Intl.DateTimeFormat("pt-BR", { weekday: "short" });
     var dateTimeFormatter = new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short" });
+    var timeFormatter = new Intl.DateTimeFormat("pt-BR", { timeStyle: "short" });
+
+    function toDisplayTemp(celsius) {
+        if (celsius === null || celsius === undefined) return null;
+        return unit === "F" ? (celsius * 9) / 5 + 32 : celsius;
+    }
 
     function fmt(value, suffix) {
         if (value === null || value === undefined) return "—";
         return numberFormatter.format(value) + (suffix || "");
+    }
+
+    function fmtTemp(celsius) {
+        return fmt(toDisplayTemp(celsius), "°" + unit);
+    }
+
+    function todayKey() {
+        var d = new Date();
+        return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
     }
 
     function buildQuery() {
@@ -36,26 +62,135 @@
         return dataUrl + "?" + params.toString();
     }
 
+    function escapeHtml(str) {
+        var div = document.createElement("div");
+        div.textContent = str;
+        return div.innerHTML;
+    }
+
+    function iconUrl(icon, size) {
+        return "https://openweathermap.org/img/wn/" + (icon || "01d") + (size === "small" ? ".png" : "@2x.png");
+    }
+
+    // ---------- Fundo dinâmico conforme a condição climática atual ----------
+
+    function skyGradientFor(icon) {
+        var code = (icon || "").slice(0, 2);
+        var isNight = (icon || "").endsWith("n");
+        var palettes = {
+            "01": isNight ? "rgba(150,140,255,.20)" : "rgba(255,196,90,.24)",
+            "02": isNight ? "rgba(130,130,190,.16)" : "rgba(255,205,140,.18)",
+            "03": "rgba(180,190,220,.14)",
+            "04": "rgba(150,158,190,.14)",
+            "09": "rgba(110,150,255,.18)",
+            "10": "rgba(110,150,255,.20)",
+            "11": "rgba(140,110,255,.22)",
+            "13": "rgba(220,235,255,.20)",
+            "50": "rgba(200,205,225,.12)",
+        };
+        var color = palettes[code] || "rgba(200,206,235,.14)";
+        return "radial-gradient(circle at 82% 6%, " + color + ", transparent 60%)";
+    }
+
+    function updateSkyBackdrop(icon) {
+        if (skyBackdrop) skyBackdrop.style.background = skyGradientFor(icon);
+    }
+
+    // ---------- Toggle °C / °F ----------
+
+    unitToggle.addEventListener("click", function (evt) {
+        var btn = evt.target.closest(".unit-btn");
+        if (!btn) return;
+        unit = btn.dataset.unit;
+        localStorage.setItem(UNIT_STORAGE_KEY, unit);
+        unitToggle.querySelectorAll(".unit-btn").forEach(function (b) {
+            b.classList.toggle("is-active", b === btn);
+        });
+        if (lastData) renderAll(lastData);
+    });
+
+    // ---------- Tira de capitais em destaque ----------
+
+    function renderHighlights(items) {
+        highlightsStrip.innerHTML = items
+            .map(function (item) {
+                var active = item.cityId === citySelect.value;
+                var temp = item.currentTempC === null || item.currentTempC === undefined ? "—" : fmtTemp(item.currentTempC);
+                return (
+                    '<button type="button" class="highlight-chip' + (active ? " is-active" : "") + '" data-city="' + item.cityId + '">' +
+                    '<img src="' + iconUrl(item.icon, "small") + '" alt="" />' +
+                    '<span class="highlight-chip-name">' + escapeHtml(item.cityName) + "</span>" +
+                    '<span class="highlight-chip-temp">' + temp + "</span>" +
+                    "</button>"
+                );
+            })
+            .join("");
+    }
+
+    function loadHighlights() {
+        fetch(highlightsUrl)
+            .then(function (r) { return r.ok ? r.json() : []; })
+            .then(renderHighlights)
+            .catch(function () { /* tira de destaque é cosmética; falha aqui não deve incomodar o usuário */ });
+    }
+
+    highlightsStrip.addEventListener("click", function (evt) {
+        var chip = evt.target.closest(".highlight-chip");
+        if (!chip) return;
+        citySelect.value = chip.dataset.city;
+        loadData();
+    });
+
+    // ---------- Cartão de clima atual ----------
+
     function renderCurrentCard(data) {
         var today = data.today;
         if (!today || today.currentTempC === null || today.currentTempC === undefined) {
             currentCard.innerHTML =
                 '<div class="current-weather-error"><i class="ph ph-cloud-slash"></i> ' +
                 "Sem leitura registrada hoje para " + escapeHtml(data.cityName) + " ainda.</div>";
+            updateSkyBackdrop(null);
             return;
         }
 
-        var iconUrl = "https://openweathermap.org/img/wn/" + (today.currentIcon || "01d") + "@2x.png";
+        updateSkyBackdrop(today.currentIcon);
+
+        var details = [];
+        if (today.currentFeelsLikeC !== null && today.currentFeelsLikeC !== undefined) {
+            details.push(["ph-thermometer-simple", "Sensação térmica", fmtTemp(today.currentFeelsLikeC)]);
+        }
+        if (today.sunriseUtc) {
+            details.push(["ph-sun-horizon", "Nascer do sol", timeFormatter.format(new Date(today.sunriseUtc))]);
+        }
+        if (today.sunsetUtc) {
+            details.push(["ph-moon-stars", "Pôr do sol", timeFormatter.format(new Date(today.sunsetUtc))]);
+        }
+
+        var detailsHtml = details.length
+            ? '<div class="current-weather-secondary">' +
+              details
+                  .map(function (d) {
+                      return (
+                          '<div class="current-weather-detail"><i class="ph ' + d[0] + '"></i><span>' +
+                          '<span class="current-weather-detail-label">' + d[1] + "</span>" +
+                          '<span class="current-weather-detail-value">' + d[2] + "</span></span></div>"
+                      );
+                  })
+                  .join("") +
+              "</div>"
+            : "";
+
         currentCard.innerHTML =
-            '<img class="current-weather-icon" src="' + iconUrl + '" alt="' + escapeHtml(today.currentDescription || "") + '" />' +
+            '<img class="current-weather-icon" src="' + iconUrl(today.currentIcon) + '" alt="' + escapeHtml(today.currentDescription || "") + '" />' +
             '<div class="current-weather-main">' +
             '<div class="current-weather-location"><i class="ph ph-map-pin"></i> ' + escapeHtml(data.cityName) + " / " + escapeHtml(data.uf) + "</div>" +
-            '<div class="current-weather-temp">' + fmt(today.currentTempC) + "<span>°C</span></div>" +
+            '<div class="current-weather-temp">' + fmt(toDisplayTemp(today.currentTempC)) + "<span>°" + unit + "</span></div>" +
             '<div class="current-weather-desc">' + escapeHtml(today.currentDescription || "") + "</div>" +
             "</div>" +
             '<div class="current-weather-updated">' +
             (today.lastUpdatedUtc ? "Atualizado em<br/>" + dateTimeFormatter.format(new Date(today.lastUpdatedUtc)) : "") +
-            "</div>";
+            "</div>" +
+            detailsHtml;
     }
 
     function statCard(icon, label, value) {
@@ -68,14 +203,41 @@
 
     function renderStats(today) {
         statsGrid.innerHTML = [
-            statCard("ph-thermometer-simple", "Máxima hoje", fmt(today.tempMaxC, "°C")),
-            statCard("ph-thermometer", "Mínima hoje", fmt(today.tempMinC, "°C")),
-            statCard("ph-chart-line-up", "Média hoje", fmt(today.tempAvgC, "°C")),
+            statCard("ph-thermometer-simple", "Máxima hoje", fmtTemp(today.tempMaxC)),
+            statCard("ph-thermometer", "Mínima hoje", fmtTemp(today.tempMinC)),
+            statCard("ph-chart-line-up", "Média hoje", fmtTemp(today.tempAvgC)),
             statCard("ph-drop", "Umidade média", fmt(today.humidityAvgPercent, "%")),
             statCard("ph-wind", "Vento médio", fmt(today.windAvgMs, " m/s")),
             statCard("ph-database", "Leituras hoje", today.readingsCount ?? 0),
         ].join("");
     }
+
+    // ---------- Tira de dias ----------
+
+    function renderDayStrip(dailySeries) {
+        if (!dailySeries || dailySeries.length === 0) {
+            dayStripCard.hidden = true;
+            return;
+        }
+        dayStripCard.hidden = false;
+
+        var today = todayKey();
+        dayStrip.innerHTML = dailySeries
+            .map(function (d) {
+                var isToday = d.date === today;
+                var label = isToday ? "Hoje" : weekdayFormatter.format(new Date(d.date));
+                return (
+                    '<div class="day-card' + (isToday ? " is-today" : "") + '">' +
+                    '<span class="day-card-label">' + escapeHtml(label) + "</span>" +
+                    '<img src="' + iconUrl(d.representativeIcon, "small") + '" alt="' + escapeHtml(d.representativeDescription || "") + '" />' +
+                    '<span class="day-card-temps">' + fmtTemp(d.tempMaxC) + ' <span class="min">' + fmtTemp(d.tempMinC) + "</span></span>" +
+                    "</div>"
+                );
+            })
+            .join("");
+    }
+
+    // ---------- Gráficos ----------
 
     function chartPalette() {
         var styles = getComputedStyle(document.documentElement);
@@ -107,9 +269,9 @@
             data: {
                 labels: labels,
                 datasets: [
-                    { label: "Mínima (°C)", data: dailySeries.map(function (d) { return d.tempMinC; }), borderColor: palette.accent2, backgroundColor: "transparent", tension: 0.35 },
-                    { label: "Média (°C)", data: dailySeries.map(function (d) { return d.tempAvgC; }), borderColor: palette.accent, backgroundColor: "transparent", tension: 0.35, borderWidth: 3 },
-                    { label: "Máxima (°C)", data: dailySeries.map(function (d) { return d.tempMaxC; }), borderColor: palette.warn, backgroundColor: "transparent", tension: 0.35 },
+                    { label: "Mínima (°" + unit + ")", data: dailySeries.map(function (d) { return toDisplayTemp(d.tempMinC); }), borderColor: palette.accent2, backgroundColor: "transparent", tension: 0.35 },
+                    { label: "Média (°" + unit + ")", data: dailySeries.map(function (d) { return toDisplayTemp(d.tempAvgC); }), borderColor: palette.accent, backgroundColor: "transparent", tension: 0.35, borderWidth: 3 },
+                    { label: "Máxima (°" + unit + ")", data: dailySeries.map(function (d) { return toDisplayTemp(d.tempMaxC); }), borderColor: palette.warn, backgroundColor: "transparent", tension: 0.35 },
                 ],
             },
             options: {
@@ -158,10 +320,21 @@
         });
     }
 
-    function escapeHtml(str) {
-        var div = document.createElement("div");
-        div.textContent = str;
-        return div.innerHTML;
+    // ---------- Orquestração ----------
+
+    function renderAll(data) {
+        renderCurrentCard(data);
+        renderStats(data.today || {});
+        renderDayStrip(data.dailySeries);
+
+        var hasSeries = data.dailySeries && data.dailySeries.length > 0;
+        chartsGrid.hidden = !hasSeries;
+        emptyState.hidden = hasSeries;
+        if (hasSeries) renderCharts(data.dailySeries);
+
+        highlightsStrip.querySelectorAll(".highlight-chip").forEach(function (chip) {
+            chip.classList.toggle("is-active", chip.dataset.city === data.cityId);
+        });
     }
 
     function loadData() {
@@ -171,13 +344,8 @@
                 return response.json();
             })
             .then(function (data) {
-                renderCurrentCard(data);
-                renderStats(data.today || {});
-
-                var hasSeries = data.dailySeries && data.dailySeries.length > 0;
-                chartsGrid.hidden = !hasSeries;
-                emptyState.hidden = hasSeries;
-                if (hasSeries) renderCharts(data.dailySeries);
+                lastData = data;
+                renderAll(data);
 
                 var url = new URL(window.location.href);
                 url.searchParams.set("city", data.cityId);
@@ -194,5 +362,9 @@
     });
 
     loadData();
-    setInterval(loadData, AUTO_REFRESH_MS);
+    loadHighlights();
+    setInterval(function () {
+        loadData();
+        loadHighlights();
+    }, AUTO_REFRESH_MS);
 })();

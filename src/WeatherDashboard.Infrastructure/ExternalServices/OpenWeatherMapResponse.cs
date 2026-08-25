@@ -14,6 +14,9 @@ internal sealed class OpenWeatherMapResponse
     [JsonPropertyName("wind")]
     public WindInfo? Wind { get; set; }
 
+    [JsonPropertyName("sys")]
+    public SysInfo? Sys { get; set; }
+
     [JsonPropertyName("dt")]
     public long Dt { get; set; }
 
@@ -54,5 +57,14 @@ internal sealed class OpenWeatherMapResponse
     {
         [JsonPropertyName("speed")]
         public double Speed { get; set; }
+    }
+
+    internal sealed class SysInfo
+    {
+        [JsonPropertyName("sunrise")]
+        public long Sunrise { get; set; }
+
+        [JsonPropertyName("sunset")]
+        public long Sunset { get; set; }
     }
 }

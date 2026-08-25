@@ -22,6 +22,7 @@ public class OpenWeatherMapClientTests
           "weather": [{ "main": "Clear", "description": "céu limpo", "icon": "01d" }],
           "main": { "temp": 25.5, "feels_like": 25.1, "temp_min": 23.0, "temp_max": 27.0, "pressure": 1013, "humidity": 60 },
           "wind": { "speed": 3.6 },
+          "sys": { "sunrise": 1735703400, "sunset": 1735747800 },
           "dt": 1735707600
         }
         """;
@@ -46,6 +47,8 @@ public class OpenWeatherMapClientTests
         Assert.Equal(3.6, record.WindSpeedMs);
         Assert.Equal("céu limpo", record.WeatherDescription);
         Assert.Equal("01d", record.WeatherIcon);
+        Assert.Equal(DateTimeOffset.FromUnixTimeSeconds(1735703400).UtcDateTime, record.SunriseUtc);
+        Assert.Equal(DateTimeOffset.FromUnixTimeSeconds(1735747800).UtcDateTime, record.SunsetUtc);
     }
 
     [Fact]

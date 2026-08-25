@@ -3,11 +3,14 @@
     ViewData["Title"] = "Dashboard";
 }
 
+<div class="sky-backdrop" id="sky-backdrop" aria-hidden="true"></div>
+
 <div class="dashboard"
      data-city="@Model.SelectedCityId"
      data-start="@Model.DefaultStart.ToString("yyyy-MM-dd")"
      data-end="@Model.DefaultEnd.ToString("yyyy-MM-dd")"
-     data-data-url="@Url.Action("Data", "Home")">
+     data-data-url="@Url.Action("Data", "Home")"
+     data-highlights-url="@Url.Action("Highlights", "Home")">
 
     <header class="dashboard-header">
         <div class="brand">
@@ -16,6 +19,11 @@
                 <span class="brand-title">Clima Brasil</span>
                 <span class="brand-subtitle">histórico climático das capitais</span>
             </div>
+        </div>
+
+        <div class="unit-toggle" id="unit-toggle" role="group" aria-label="Unidade de temperatura">
+            <button type="button" class="unit-btn is-active" data-unit="C">°C</button>
+            <button type="button" class="unit-btn" data-unit="F">°F</button>
         </div>
 
         <form id="filters-form" class="filters">
@@ -44,6 +52,8 @@
         </form>
     </header>
 
+    <nav class="highlights-strip ceu-scroll" id="highlights-strip" aria-label="Capitais em destaque"></nav>
+
     <section class="current-weather-card" id="current-card" aria-live="polite">
         <div class="current-weather-loading">
             <i class="ph ph-circle-notch ph-spin"></i> Carregando dados…
@@ -51,6 +61,11 @@
     </section>
 
     <section class="stats-grid" id="today-stats"></section>
+
+    <section class="day-strip-card" id="day-strip-card" hidden>
+        <h2><i class="ph ph-calendar-dots"></i> Dias no período selecionado</h2>
+        <div class="day-strip ceu-scroll" id="day-strip"></div>
+    </section>
 
     <section class="charts-grid">
         <div class="chart-card">

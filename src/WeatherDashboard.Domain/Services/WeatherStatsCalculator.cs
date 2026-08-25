@@ -22,14 +22,22 @@ public static class WeatherStatsCalculator
             .GroupBy(r => DateOnly.FromDateTime(r.ObservedAtUtc))
             .Where(g => g.Key >= start && g.Key <= end)
             .OrderBy(g => g.Key)
-            .Select(g => new DailyWeatherStats(
-                g.Key,
-                TempMinC: g.Min(r => r.TempMinC),
-                TempMaxC: g.Max(r => r.TempMaxC),
-                TempAvgC: Math.Round(g.Average(r => r.TemperatureC), 1),
-                HumidityAvgPercent: Math.Round(g.Average(r => r.HumidityPercent), 1),
-                WindAvgMs: Math.Round(g.Average(r => r.WindSpeedMs), 1),
-                ReadingsCount: g.Count()))
+            .Select(g =>
+            {
+                // A leitura de temperatura mais alta do dia costuma cair perto do meio-dia,
+                // então usamos sua condição/ícone como "representante" visual do dia inteiro.
+                var representative = g.OrderByDescending(r => r.TemperatureC).First();
+                return new DailyWeatherStats(
+                    g.Key,
+                    TempMinC: g.Min(r => r.TempMinC),
+                    TempMaxC: g.Max(r => r.TempMaxC),
+                    TempAvgC: Math.Round(g.Average(r => r.TemperatureC), 1),
+                    HumidityAvgPercent: Math.Round(g.Average(r => r.HumidityPercent), 1),
+                    WindAvgMs: Math.Round(g.Average(r => r.WindSpeedMs), 1),
+                    ReadingsCount: g.Count(),
+                    RepresentativeIcon: representative.WeatherIcon,
+                    RepresentativeDescription: representative.WeatherDescription);
+            })
             .ToList();
     }
 
@@ -44,6 +52,7 @@ public static class WeatherStatsCalculator
         var latest = list[^1];
         return new TodayWeatherStats(
             CurrentTempC: latest.TemperatureC,
+            CurrentFeelsLikeC: latest.FeelsLikeC,
             CurrentDescription: latest.WeatherDescription,
             CurrentIcon: latest.WeatherIcon,
             TempMinC: list.Min(r => r.TempMinC),
@@ -52,6 +61,8 @@ public static class WeatherStatsCalculator
             HumidityAvgPercent: Math.Round(list.Average(r => r.HumidityPercent), 1),
             WindAvgMs: Math.Round(list.Average(r => r.WindSpeedMs), 1),
             ReadingsCount: list.Count,
-            LastUpdatedUtc: latest.CollectedAtUtc);
+            LastUpdatedUtc: latest.CollectedAtUtc,
+            SunriseUtc: latest.SunriseUtc,
+            SunsetUtc: latest.SunsetUtc);
     }
 }

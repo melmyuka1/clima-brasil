@@ -76,6 +76,8 @@ public class OpenWeatherMapClient : IWeatherApiClient
                 WeatherMain = weather?.Main ?? "Unknown",
                 WeatherDescription = weather?.Description ?? string.Empty,
                 WeatherIcon = weather?.Icon ?? "01d",
+                SunriseUtc = payload.Sys?.Sunrise > 0 ? DateTimeOffset.FromUnixTimeSeconds(payload.Sys.Sunrise).UtcDateTime : null,
+                SunsetUtc = payload.Sys?.Sunset > 0 ? DateTimeOffset.FromUnixTimeSeconds(payload.Sys.Sunset).UtcDateTime : null,
             };
         }
         catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or System.Text.Json.JsonException)

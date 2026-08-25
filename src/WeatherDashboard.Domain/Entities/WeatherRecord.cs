@@ -29,4 +29,8 @@ public sealed class WeatherRecord
     public required string WeatherMain { get; set; }
     public required string WeatherDescription { get; set; }
     public required string WeatherIcon { get; set; }
+
+    /// <summary>Nascer/pôr do sol (UTC) informados pela API no momento da leitura. Nulos se a API não os retornar.</summary>
+    public DateTime? SunriseUtc { get; set; }
+    public DateTime? SunsetUtc { get; set; }
 }

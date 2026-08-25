@@ -1,6 +1,6 @@
 namespace WeatherDashboard.Domain.Dtos;
 
-/// <summary>Agregação de um dia dentro do período consultado (usada nos gráficos históricos).</summary>
+/// <summary>Agregação de um dia dentro do período consultado (usada nos gráficos e na tira de dias).</summary>
 public sealed record DailyWeatherStats(
     DateOnly Date,
     double TempMinC,
@@ -8,4 +8,6 @@ public sealed record DailyWeatherStats(
     double TempAvgC,
     double HumidityAvgPercent,
     double WindAvgMs,
-    int ReadingsCount);
+    int ReadingsCount,
+    string RepresentativeIcon,
+    string RepresentativeDescription);

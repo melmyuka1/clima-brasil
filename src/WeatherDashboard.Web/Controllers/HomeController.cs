@@ -9,6 +9,12 @@ namespace WeatherDashboard.Web.Controllers;
 
 public class HomeController : Controller
 {
+    /// <summary>Capitais exibidas na tira de destaque sob o cabeçalho. Curitiba sempre em primeiro.</summary>
+    private static readonly string[] HighlightCityIds =
+    {
+        "curitiba", "sao-paulo", "rio-de-janeiro", "brasilia", "salvador", "manaus", "porto-alegre", "florianopolis",
+    };
+
     private readonly IWeatherRecordRepository _repository;
     private readonly ILogger<HomeController> _logger;
 
@@ -76,6 +82,42 @@ public class HomeController : Controller
         };
 
         return Json(response);
+    }
+
+    /// <summary>
+    /// Leitura atual (hoje) de um punhado de capitais em destaque, para a tira de atalhos sob o
+    /// cabeçalho — o equivalente, neste catálogo fixo de capitais, às "cidades salvas" de um app
+    /// de clima comum.
+    /// </summary>
+    [HttpGet]
+    public async Task<IActionResult> Highlights(CancellationToken cancellationToken)
+    {
+        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+
+        var results = new List<HighlightCityResponse>();
+        foreach (var cityId in HighlightCityIds)
+        {
+            var capital = BrazilianCapitals.FindById(cityId);
+            if (capital is null)
+            {
+                continue;
+            }
+
+            var records = await _repository.GetByCityAndRangeAsync(capital.Id, today, today, cancellationToken);
+            var todayStats = WeatherStatsCalculator.CalculateTodayStats(records);
+
+            results.Add(new HighlightCityResponse
+            {
+                CityId = capital.Id,
+                CityName = capital.City,
+                Uf = capital.Uf,
+                CurrentTempC = todayStats.CurrentTempC,
+                Icon = todayStats.CurrentIcon,
+                Description = todayStats.CurrentDescription,
+            });
+        }
+
+        return Json(results);
     }
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
