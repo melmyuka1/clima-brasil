@@ -1,587 +1,311 @@
+/* Clima Brasil — camada específica do app sobre o design system Nocturne
+   (nocturne.css, carregado antes deste arquivo). Aqui só entra o que a
+   dashboard precisa e que o Nocturne não já resolve com .card/.btn/.field/
+   .input/.seg — nada de tokens de cor/raio/sombra novos. */
 
-
-:root {
-    --color-bg-start: #1b1e30;
-    --color-bg-end: #262a44;
-    --color-surface: #232741;
-    --color-surface-solid: #262a44;
-    --color-border: rgba(255, 255, 255, 0.12);
-    --color-text: #f2f3fb;
-    --color-text-dim: rgba(242, 243, 251, 0.62);
-    --color-text-faint: rgba(242, 243, 251, 0.42);
-    --color-accent: #6c8bff;
-    --color-accent-200: #a9bcff;
-    --color-accent-300: #7f9aff;
-    --color-warn: #ff8a65;
-    --shadow-md: 0 18px 40px rgba(8, 10, 22, 0.45);
-    --shadow-sm: 0 8px 22px rgba(8, 10, 22, 0.35);
-    --radius-lg: 28px;
-    --radius-md: 20px;
-    --radius-sm: 14px;
-    --font-body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
-}
-
-* {
-    box-sizing: border-box;
-}
-
-/* Estilos de autor (ex.: "display: flex/grid" em .empty-state, .charts-grid, .day-strip-card)
-   sempre vencem a regra padrão do navegador para [hidden], então sem isto o atributo
-   `hidden` definido via JS (elemento.hidden = true) nunca chega a esconder nada. */
 [hidden] {
-    display: none !important;
-}
-
-html, body {
-    margin: 0;
-    padding: 0;
-    min-height: 100%;
+  display: none !important;
 }
 
 body {
-    font-family: var(--font-body);
-    color: var(--color-text);
-    background: linear-gradient(170deg, var(--color-bg-start), var(--color-bg-end)) fixed;
-    -webkit-font-smoothing: antialiased;
-    overflow-x: hidden;
-}
-
-a {
-    color: var(--color-accent-300);
+  overflow-x: hidden;
 }
 
 .app-shell {
-    position: relative;
-    min-height: 100vh;
+  position: relative;
+  min-height: 100vh;
 }
 
-/* Camada de "céu" atrás do conteúdo: um brilho radial cuja cor muda conforme a
-   condição climática atual (ensolarado, chuva, noite...), como no mockup de referência. */
+/* Camada de "céu" atrás do conteúdo: um brilho radial cuja cor muda conforme
+   a condição climática atual — a única cor na página que foge da paleta do
+   design system de propósito, porque representa o clima em si, não a UI. */
 .sky-backdrop {
-    position: fixed;
-    inset: 0;
-    z-index: 0;
-    pointer-events: none;
-    background: radial-gradient(circle at 82% 6%, rgba(255, 206, 120, 0.16), transparent 60%);
-    transition: background 900ms ease;
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at 82% 6%, color-mix(in srgb, var(--color-accent) 14%, transparent), transparent 60%);
+  transition: background 900ms ease;
 }
 
 .dashboard {
-    position: relative;
-    z-index: 1;
-    max-width: 1180px;
-    margin: 0 auto;
-    padding: 20px 16px 40px;
-    display: flex;
-    flex-direction: column;
-    gap: 18px;
+  position: relative;
+  z-index: 1;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: var(--space-4) var(--space-3) var(--space-8);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
 }
 
-.ceu-scroll::-webkit-scrollbar {
-    height: 6px;
+.scroll-x {
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+.scroll-x::-webkit-scrollbar { height: 6px; }
+.scroll-x::-webkit-scrollbar-thumb {
+  background: var(--color-divider);
+  border-radius: 999px;
 }
 
-.ceu-scroll::-webkit-scrollbar-thumb {
-    background: color-mix(in srgb, var(--color-text) 18%, transparent);
-    border-radius: 999px;
-}
-
-/* ---------- Header / filtros ---------- */
+/* ---------- Cabeçalho / filtros ---------- */
 
 .dashboard-header {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 14px;
-}
-
-.brand {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-right: auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-4);
+  padding: 0;
 }
 
 .brand-icon {
-    display: grid;
-    place-items: center;
-    width: 42px;
-    height: 42px;
-    border-radius: 16px;
-    background: color-mix(in srgb, var(--color-accent) 22%, transparent);
-    border: 1px solid color-mix(in srgb, var(--color-accent) 45%, transparent);
-    color: var(--color-accent-200);
-    font-size: 22px;
-    flex: none;
-}
-
-.brand-text {
-    display: flex;
-    flex-direction: column;
-    line-height: 1.25;
-}
-
-.brand-title {
-    font-weight: 700;
-    font-size: 19px;
-    letter-spacing: -0.01em;
-}
-
-.brand-subtitle {
-    font-size: 12px;
-    color: var(--color-text-dim);
-}
-
-.unit-toggle {
-    display: flex;
-    gap: 4px;
-    padding: 4px;
-    border-radius: 999px;
-    background: color-mix(in srgb, var(--color-surface) 62%, transparent);
-    border: 1px solid var(--color-border);
-    backdrop-filter: blur(12px);
-    flex: none;
-}
-
-.unit-btn {
-    height: 34px;
-    padding: 0 15px;
-    border: 0;
-    border-radius: 999px;
-    background: transparent;
-    color: var(--color-text-dim);
-    font-family: var(--font-body);
-    font-weight: 600;
-    font-size: 14px;
-    cursor: pointer;
-}
-
-.unit-btn.is-active {
-    background: color-mix(in srgb, var(--color-accent) 24%, transparent);
-    color: var(--color-accent-200);
+  font-size: 20px;
+  color: var(--color-accent);
+  margin-right: 6px;
 }
 
 .filters {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: end;
-    gap: 10px;
-    width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: var(--space-3);
+  width: 100%;
 }
 
 @media (min-width: 720px) {
-    .filters {
-        width: auto;
-    }
+  .filters { width: auto; }
 }
 
-.field {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    font-size: 12px;
-    color: var(--color-text-dim);
-    flex: 1 1 140px;
-}
+.field { min-width: 150px; flex: 1 1 150px; }
 
-.field select,
-.field input {
-    height: 42px;
-    padding: 0 12px;
-    border-radius: 999px;
-    border: 1px solid var(--color-border);
-    background: color-mix(in srgb, var(--color-surface) 80%, transparent);
-    color: var(--color-text);
-    font-family: var(--font-body);
-    font-size: 14px;
-    outline: none;
-    min-width: 0;
-}
-
-.field select:focus,
-.field input:focus {
-    border-color: color-mix(in srgb, var(--color-accent) 60%, transparent);
-}
-
-.btn-apply {
-    height: 42px;
-    padding: 0 20px;
-    border-radius: 999px;
-    border: 1px solid color-mix(in srgb, var(--color-accent) 60%, transparent);
-    background: color-mix(in srgb, var(--color-accent) 24%, transparent);
-    color: var(--color-accent-200);
-    font-family: var(--font-body);
-    font-weight: 600;
-    font-size: 14px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    white-space: nowrap;
-}
-
-.btn-apply:hover {
-    background: color-mix(in srgb, var(--color-accent) 34%, transparent);
-}
+.btn-apply { flex: none; }
 
 /* ---------- Tira de capitais em destaque ---------- */
 
 .highlights-strip {
-    display: flex;
-    gap: 10px;
-    overflow-x: auto;
-    padding: 2px 2px 6px;
+  display: flex;
+  gap: var(--space-2);
+  padding: 2px 2px var(--space-2);
 }
 
 .highlight-chip {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex: none;
-    padding: 6px 14px 6px 6px;
-    border-radius: 999px;
-    background: color-mix(in srgb, var(--color-surface) 55%, transparent);
-    border: 1px solid var(--color-border);
-    color: var(--color-text);
-    font-family: var(--font-body);
-    cursor: pointer;
-}
-
-.highlight-chip:hover {
-    border-color: color-mix(in srgb, var(--color-accent) 45%, transparent);
-}
-
-.highlight-chip.is-active {
-    background: color-mix(in srgb, var(--color-accent) 20%, transparent);
-    border-color: color-mix(in srgb, var(--color-accent) 60%, transparent);
+  flex: none;
+  gap: 8px;
 }
 
 .highlight-chip img {
-    width: 28px;
-    height: 28px;
-    flex: none;
-}
-
-.highlight-chip-name {
-    font-size: 12.5px;
-    color: var(--color-text-dim);
-    white-space: nowrap;
+  width: 22px;
+  height: 22px;
 }
 
 .highlight-chip-temp {
-    font-weight: 600;
-    font-size: 14px;
-    white-space: nowrap;
+  font-family: var(--font-heading);
+  font-weight: 600;
 }
 
 /* ---------- Cartão de clima atual ---------- */
 
 .current-weather-card {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 24px;
-    padding: 26px;
-    border-radius: var(--radius-lg);
-    background: color-mix(in srgb, var(--color-surface) 66%, transparent);
-    border: 1px solid var(--color-border);
-    box-shadow: var(--shadow-md);
-    backdrop-filter: blur(16px);
-    min-height: 120px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-6);
+  padding: var(--space-6);
 }
 
 .current-weather-loading,
 .current-weather-error {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    color: var(--color-text-dim);
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.ph-spin {
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
+.ph-spin { animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
 
 .current-weather-icon {
-    width: 84px;
-    height: 84px;
-    flex: none;
+  width: 76px;
+  height: 76px;
+  flex: none;
 }
 
 .current-weather-main {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .current-weather-location {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 13px;
-    color: var(--color-text-dim);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
 }
 
 .current-weather-temp {
-    font-weight: 600;
-    font-size: 64px;
-    line-height: 1;
-    letter-spacing: -0.03em;
+  font-family: var(--font-heading);
+  font-weight: var(--font-heading-weight);
+  font-size: 58px;
+  line-height: 1;
+  letter-spacing: -0.02em;
 }
 
 .current-weather-temp span {
-    font-size: 26px;
-    color: var(--color-text-dim);
+  font-size: 24px;
 }
 
-.current-weather-desc {
-    font-size: 16px;
-    color: var(--color-text-dim);
-    text-transform: capitalize;
-}
+.current-weather-desc { font-size: 15px; text-transform: capitalize; }
 
 .current-weather-updated {
-    margin-left: auto;
-    font-size: 12px;
-    color: var(--color-text-faint);
-    text-align: right;
+  margin-left: auto;
+  font-size: 12px;
+  text-align: right;
 }
 
 .current-weather-secondary {
-    flex-basis: 100%;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 22px;
-    padding-top: 16px;
-    margin-top: 2px;
-    border-top: 1px solid var(--color-border);
+  flex-basis: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-6);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-divider);
 }
 
 .current-weather-detail {
-    display: flex;
-    align-items: center;
-    gap: 9px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
 }
 
 .current-weather-detail i {
-    font-size: 20px;
-    color: var(--color-accent-200);
-    flex: none;
+  font-size: 19px;
+  color: var(--color-accent);
 }
 
 .current-weather-detail-label {
-    display: block;
-    font-size: 11px;
-    color: var(--color-text-dim);
+  display: block;
+  font-size: 11px;
 }
 
 .current-weather-detail-value {
-    display: block;
-    font-size: 14px;
-}
-
-/* ---------- Tira de dias ---------- */
-
-.day-strip-card {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    padding: 18px;
-    border-radius: var(--radius-lg);
-    background: color-mix(in srgb, var(--color-surface) 60%, transparent);
-    border: 1px solid var(--color-border);
-    box-shadow: var(--shadow-sm);
-    backdrop-filter: blur(16px);
-}
-
-.day-strip-card h2 {
-    margin: 0;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--color-text-dim);
-}
-
-.day-strip {
-    display: grid;
-    grid-auto-flow: column;
-    grid-auto-columns: minmax(100px, 1fr);
-    gap: 10px;
-    overflow-x: auto;
-    padding-bottom: 4px;
-}
-
-.day-card {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-    padding: 14px 8px 12px;
-    border-radius: 20px;
-    background: color-mix(in srgb, var(--color-text) 6%, transparent);
-    border: 1px solid transparent;
-}
-
-.day-card.is-today {
-    background: color-mix(in srgb, var(--color-accent) 18%, transparent);
-    border-color: color-mix(in srgb, var(--color-accent) 55%, transparent);
-}
-
-.day-card img {
-    width: 40px;
-    height: 40px;
-}
-
-.day-card-label {
-    font-size: 12px;
-    color: var(--color-text-dim);
-    text-transform: capitalize;
-    white-space: nowrap;
-}
-
-.day-card-temps {
-    font-weight: 600;
-    font-size: 14px;
-}
-
-.day-card-temps .min {
-    font-weight: 400;
-    color: var(--color-text-dim);
+  display: block;
+  font-size: 14px;
 }
 
 /* ---------- Cartões de estatísticas ---------- */
 
 .stats-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-3);
 }
 
 @media (min-width: 560px) {
-    .stats-grid {
-        grid-template-columns: repeat(4, 1fr);
-    }
+  .stats-grid { grid-template-columns: repeat(4, 1fr); }
 }
 
 .stat-card {
-    display: flex;
-    align-items: center;
-    gap: 11px;
-    padding: 14px;
-    border-radius: var(--radius-sm);
-    background: color-mix(in srgb, var(--color-surface) 62%, transparent);
-    border: 1px solid var(--color-border);
-    box-shadow: var(--shadow-sm);
-    backdrop-filter: blur(14px);
+  flex-direction: row;
+  align-items: center;
+  gap: 11px;
 }
 
 .stat-card i {
-    font-size: 21px;
-    color: var(--color-accent-200);
-    flex: none;
+  font-size: 20px;
+  color: var(--color-accent);
+  flex: none;
 }
 
 .stat-card-body {
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-}
-
-.stat-card-label {
-    font-size: 11px;
-    color: var(--color-text-dim);
-    white-space: nowrap;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
 }
 
 .stat-card-value {
-    font-weight: 600;
-    font-size: 17px;
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 17px;
+}
+
+/* ---------- Tira de dias ---------- */
+
+.day-strip {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(96px, 1fr);
+  gap: var(--space-2);
+  padding-bottom: 2px;
+}
+
+.day-card {
+  align-items: center;
+  gap: 4px;
+  padding: var(--space-3) var(--space-2);
+  border: 1px solid transparent;
+}
+
+.day-card.is-today {
+  border-color: var(--color-accent);
+}
+
+.day-card img { width: 36px; height: 36px; }
+
+.day-card-label {
+  font-size: 12px;
+  text-transform: capitalize;
+  white-space: nowrap;
+}
+
+.day-card-temps {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 14px;
 }
 
 /* ---------- Gráficos ---------- */
 
 .charts-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 18px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-6);
 }
 
 @media (min-width: 900px) {
-    .charts-grid {
-        grid-template-columns: 1fr 1fr;
-    }
-}
-
-.chart-card {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    padding: 20px;
-    border-radius: var(--radius-lg);
-    background: color-mix(in srgb, var(--color-surface) 60%, transparent);
-    border: 1px solid var(--color-border);
-    box-shadow: var(--shadow-sm);
-    backdrop-filter: blur(16px);
-}
-
-.chart-card h2 {
-    margin: 0;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--color-text-dim);
+  .charts-grid { grid-template-columns: 1fr 1fr; }
 }
 
 .chart-canvas-wrap {
-    position: relative;
-    height: 260px;
+  position: relative;
+  height: 260px;
 }
 
 /* ---------- Estado vazio / erro ---------- */
 
 .empty-state {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 16px 18px;
-    border-radius: var(--radius-md);
-    background: color-mix(in srgb, var(--color-surface) 50%, transparent);
-    border: 1px dashed var(--color-border);
-    color: var(--color-text-dim);
-    font-size: 13px;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  border: 1px dashed var(--color-divider);
+  font-size: 13px;
 }
 
 /* ---------- Página de erro ---------- */
 
 .error-page {
-    max-width: 640px;
-    margin: 80px auto;
-    padding: 32px;
-    text-align: center;
+  max-width: 640px;
+  margin: 80px auto;
+  padding: var(--space-6);
+  text-align: center;
 }
 
 .error-page h1 {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    color: var(--color-warn);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: var(--color-accent-2);
 }
 
-.error-request-id {
-    color: var(--color-text-dim);
-    font-size: 13px;
-}
-
-.error-back-link {
-    display: inline-block;
-    margin-top: 12px;
-}
+.error-back-link { display: inline-block; margin-top: var(--space-3); }

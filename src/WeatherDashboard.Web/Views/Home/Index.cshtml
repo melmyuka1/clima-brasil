@@ -12,24 +12,24 @@
      data-data-url="@Url.Action("Data", "Home")"
      data-highlights-url="@Url.Action("Highlights", "Home")">
 
-    <header class="dashboard-header">
-        <div class="brand">
-            <div class="brand-icon"><i class="ph ph-cloud-sun"></i></div>
-            <div class="brand-text">
-                <span class="brand-title">Clima Brasil</span>
-                <span class="brand-subtitle">histórico climático das capitais</span>
-            </div>
-        </div>
+    <header class="dashboard-header nav">
+        <span class="nav-brand"><i class="ph ph-cloud-sun brand-icon"></i>Clima Brasil</span>
 
-        <div class="unit-toggle" id="unit-toggle" role="group" aria-label="Unidade de temperatura">
-            <button type="button" class="unit-btn is-active" data-unit="C">°C</button>
-            <button type="button" class="unit-btn" data-unit="F">°F</button>
+        <div class="seg" id="unit-toggle">
+            <label class="seg-opt">
+                <input type="radio" name="unit" value="C" checked />
+                °C
+            </label>
+            <label class="seg-opt">
+                <input type="radio" name="unit" value="F" />
+                °F
+            </label>
         </div>
 
         <form id="filters-form" class="filters">
-            <label class="field">
-                <span>Cidade</span>
-                <select id="city-select" name="city">
+            <div class="field">
+                <label for="city-select">Cidade</label>
+                <select id="city-select" name="city" class="input">
                     @foreach (var capital in Model.Capitals)
                     {
                         <option value="@capital.Id" selected="@(capital.Id == Model.SelectedCityId)">
@@ -37,48 +37,48 @@
                         </option>
                     }
                 </select>
-            </label>
-            <label class="field">
-                <span>De</span>
-                <input type="date" id="start-date" name="start" value="@Model.DefaultStart.ToString("yyyy-MM-dd")" />
-            </label>
-            <label class="field">
-                <span>Até</span>
-                <input type="date" id="end-date" name="end" value="@Model.DefaultEnd.ToString("yyyy-MM-dd")" />
-            </label>
-            <button type="submit" class="btn-apply">
+            </div>
+            <div class="field">
+                <label for="start-date">De</label>
+                <input type="date" id="start-date" name="start" class="input" value="@Model.DefaultStart.ToString("yyyy-MM-dd")" />
+            </div>
+            <div class="field">
+                <label for="end-date">Até</label>
+                <input type="date" id="end-date" name="end" class="input" value="@Model.DefaultEnd.ToString("yyyy-MM-dd")" />
+            </div>
+            <button type="submit" class="btn btn-primary btn-apply">
                 <i class="ph ph-magnifying-glass"></i> Aplicar
             </button>
         </form>
     </header>
 
-    <nav class="highlights-strip ceu-scroll" id="highlights-strip" aria-label="Capitais em destaque"></nav>
+    <nav class="highlights-strip scroll-x" id="highlights-strip" aria-label="Capitais em destaque"></nav>
 
-    <section class="current-weather-card" id="current-card" aria-live="polite">
-        <div class="current-weather-loading">
+    <section class="current-weather-card card elev-md" id="current-card" aria-live="polite">
+        <div class="current-weather-loading text-muted">
             <i class="ph ph-circle-notch ph-spin"></i> Carregando dados…
         </div>
     </section>
 
     <section class="stats-grid" id="today-stats"></section>
 
-    <section class="day-strip-card" id="day-strip-card" hidden>
-        <h2><i class="ph ph-calendar-dots"></i> Dias no período selecionado</h2>
-        <div class="day-strip ceu-scroll" id="day-strip"></div>
+    <section class="card elev-sm" id="day-strip-card" hidden>
+        <h2 class="card-title"><i class="ph ph-calendar-dots"></i> Dias no período selecionado</h2>
+        <div class="day-strip scroll-x" id="day-strip"></div>
     </section>
 
     <section class="charts-grid">
-        <div class="chart-card">
-            <h2><i class="ph ph-chart-line"></i> Temperatura no período (mín · média · máx)</h2>
+        <div class="card elev-sm">
+            <h2 class="card-title"><i class="ph ph-chart-line"></i> Temperatura no período (mín · média · máx)</h2>
             <div class="chart-canvas-wrap"><canvas id="temperature-chart"></canvas></div>
         </div>
-        <div class="chart-card">
-            <h2><i class="ph ph-chart-bar"></i> Umidade e vento médios no período</h2>
+        <div class="card elev-sm">
+            <h2 class="card-title"><i class="ph ph-chart-bar"></i> Umidade e vento médios no período</h2>
             <div class="chart-canvas-wrap"><canvas id="humidity-wind-chart"></canvas></div>
         </div>
     </section>
 
-    <p id="empty-state" class="empty-state" hidden>
+    <p id="empty-state" class="empty-state card text-muted" hidden>
         <i class="ph ph-info"></i>
         Ainda não há dados coletados para este período. A coleta acontece automaticamente a cada 15 minutos
         assim que a aplicação está em execução — volte em instantes.

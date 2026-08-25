@@ -5,10 +5,10 @@
 
 <div class="error-page">
     <h1><i class="ph ph-warning-circle"></i> Ocorreu um erro</h1>
-    <p>Não foi possível processar sua solicitação. Tente novamente em instantes.</p>
+    <p class="text-muted">Não foi possível processar sua solicitação. Tente novamente em instantes.</p>
     @if (Model.ShowRequestId)
     {
-        <p class="error-request-id">ID da requisição: <code>@Model.RequestId</code></p>
+        <p class="text-muted">ID da requisição: <code>@Model.RequestId</code></p>
     }
-    <a class="error-back-link" href="/">Voltar ao dashboard</a>
+    <a class="btn btn-primary error-back-link" href="/">Voltar ao dashboard</a>
 </div>

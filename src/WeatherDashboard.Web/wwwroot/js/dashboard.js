@@ -96,16 +96,15 @@
         if (skyBackdrop) skyBackdrop.style.background = skyGradientFor(icon);
     }
 
-    // ---------- Toggle °C / °F ----------
+    // ---------- Toggle °C / °F (segmented control do Nocturne: .seg > .seg-opt > input[type=radio]) ----------
 
-    unitToggle.addEventListener("click", function (evt) {
-        var btn = evt.target.closest(".unit-btn");
-        if (!btn) return;
-        unit = btn.dataset.unit;
+    var unitRadio = unitToggle.querySelector('input[value="' + unit + '"]');
+    if (unitRadio) unitRadio.checked = true;
+
+    unitToggle.addEventListener("change", function (evt) {
+        if (evt.target.name !== "unit") return;
+        unit = evt.target.value;
         localStorage.setItem(UNIT_STORAGE_KEY, unit);
-        unitToggle.querySelectorAll(".unit-btn").forEach(function (b) {
-            b.classList.toggle("is-active", b === btn);
-        });
         if (lastData) renderAll(lastData);
     });
 
@@ -117,9 +116,9 @@
                 var active = item.cityId === citySelect.value;
                 var temp = item.currentTempC === null || item.currentTempC === undefined ? "—" : fmtTemp(item.currentTempC);
                 return (
-                    '<button type="button" class="highlight-chip' + (active ? " is-active" : "") + '" data-city="' + item.cityId + '">' +
+                    '<button type="button" class="btn ' + (active ? "btn-primary" : "btn-secondary") + ' highlight-chip" data-city="' + item.cityId + '">' +
                     '<img src="' + iconUrl(item.icon, "small") + '" alt="" />' +
-                    '<span class="highlight-chip-name">' + escapeHtml(item.cityName) + "</span>" +
+                    "<span>" + escapeHtml(item.cityName) + "</span>" +
                     '<span class="highlight-chip-temp">' + temp + "</span>" +
                     "</button>"
                 );
@@ -172,7 +171,7 @@
                   .map(function (d) {
                       return (
                           '<div class="current-weather-detail"><i class="ph ' + d[0] + '"></i><span>' +
-                          '<span class="current-weather-detail-label">' + d[1] + "</span>" +
+                          '<span class="current-weather-detail-label text-muted">' + d[1] + "</span>" +
                           '<span class="current-weather-detail-value">' + d[2] + "</span></span></div>"
                       );
                   })
@@ -183,11 +182,11 @@
         currentCard.innerHTML =
             '<img class="current-weather-icon" src="' + iconUrl(today.currentIcon) + '" alt="' + escapeHtml(today.currentDescription || "") + '" />' +
             '<div class="current-weather-main">' +
-            '<div class="current-weather-location"><i class="ph ph-map-pin"></i> ' + escapeHtml(data.cityName) + " / " + escapeHtml(data.uf) + "</div>" +
+            '<div class="current-weather-location text-muted"><i class="ph ph-map-pin"></i> ' + escapeHtml(data.cityName) + " / " + escapeHtml(data.uf) + "</div>" +
             '<div class="current-weather-temp">' + fmt(toDisplayTemp(today.currentTempC)) + "<span>°" + unit + "</span></div>" +
-            '<div class="current-weather-desc">' + escapeHtml(today.currentDescription || "") + "</div>" +
+            '<div class="current-weather-desc text-muted">' + escapeHtml(today.currentDescription || "") + "</div>" +
             "</div>" +
-            '<div class="current-weather-updated">' +
+            '<div class="current-weather-updated text-muted">' +
             (today.lastUpdatedUtc ? "Atualizado em<br/>" + dateTimeFormatter.format(new Date(today.lastUpdatedUtc)) : "") +
             "</div>" +
             detailsHtml;
@@ -195,8 +194,8 @@
 
     function statCard(icon, label, value) {
         return (
-            '<div class="stat-card"><i class="ph ' + icon + '"></i><div class="stat-card-body">' +
-            '<span class="stat-card-label">' + label + "</span>" +
+            '<div class="card stat-card"><i class="ph ' + icon + '"></i><div class="stat-card-body">' +
+            '<span class="card-meta">' + label + "</span>" +
             '<span class="stat-card-value">' + value + "</span></div></div>"
         );
     }
@@ -227,10 +226,10 @@
                 var isToday = d.date === today;
                 var label = isToday ? "Hoje" : weekdayFormatter.format(new Date(d.date));
                 return (
-                    '<div class="day-card' + (isToday ? " is-today" : "") + '">' +
-                    '<span class="day-card-label">' + escapeHtml(label) + "</span>" +
+                    '<div class="card day-card' + (isToday ? " is-today" : "") + '">' +
+                    '<span class="day-card-label text-muted">' + escapeHtml(label) + "</span>" +
                     '<img src="' + iconUrl(d.representativeIcon, "small") + '" alt="' + escapeHtml(d.representativeDescription || "") + '" />' +
-                    '<span class="day-card-temps">' + fmtTemp(d.tempMaxC) + ' <span class="min">' + fmtTemp(d.tempMinC) + "</span></span>" +
+                    '<span class="day-card-temps">' + fmtTemp(d.tempMaxC) + ' <span class="text-muted">' + fmtTemp(d.tempMinC) + "</span></span>" +
                     "</div>"
                 );
             })
@@ -242,11 +241,11 @@
     function chartPalette() {
         var styles = getComputedStyle(document.documentElement);
         return {
-            text: styles.getPropertyValue("--color-text").trim() || "#f2f3fb",
-            grid: "rgba(255,255,255,0.08)",
-            accent: styles.getPropertyValue("--color-accent").trim() || "#6c8bff",
-            accent2: styles.getPropertyValue("--color-accent-200").trim() || "#a9bcff",
-            warn: styles.getPropertyValue("--color-warn").trim() || "#ff8a65",
+            text: styles.getPropertyValue("--color-text").trim() || "#e9e9ed",
+            grid: styles.getPropertyValue("--color-divider").trim() || "rgba(233,233,237,0.16)",
+            accent: styles.getPropertyValue("--color-accent").trim() || "#9184d9",
+            accent2: styles.getPropertyValue("--color-accent-300").trim() || "#d2cefd",
+            warn: styles.getPropertyValue("--color-accent-2").trim() || "#a7a1db",
         };
     }
 
@@ -293,7 +292,7 @@
                         type: "bar",
                         label: "Umidade média (%)",
                         data: dailySeries.map(function (d) { return d.humidityAvgPercent; }),
-                        backgroundColor: "rgba(108,139,255,0.45)",
+                        backgroundColor: "rgba(145,132,217,0.45)",
                         yAxisID: "y",
                     },
                     {
@@ -333,7 +332,9 @@
         if (hasSeries) renderCharts(data.dailySeries);
 
         highlightsStrip.querySelectorAll(".highlight-chip").forEach(function (chip) {
-            chip.classList.toggle("is-active", chip.dataset.city === data.cityId);
+            var active = chip.dataset.city === data.cityId;
+            chip.classList.toggle("btn-primary", active);
+            chip.classList.toggle("btn-secondary", !active);
         });
     }
 
