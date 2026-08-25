@@ -43,5 +43,6 @@ public static class BrazilianCapitals
     public static BrazilianCapital? FindById(string id) =>
         All.FirstOrDefault(c => c.Id.Equals(id, StringComparison.OrdinalIgnoreCase));
 
-    public static readonly BrazilianCapital Default = All.Single(c => c.Id == "sao-paulo");
+    /// <summary>Cidade principal exibida por padrão ao abrir o dashboard.</summary>
+    public static readonly BrazilianCapital Default = All.Single(c => c.Id == "curitiba");
 }

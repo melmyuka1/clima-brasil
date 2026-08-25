@@ -41,7 +41,7 @@ public class HomeControllerTests
         var result = Assert.IsType<ViewResult>(controller.Index(city: null));
         var model = Assert.IsType<DashboardIndexViewModel>(result.Model);
 
-        Assert.Equal("sao-paulo", model.SelectedCityId);
+        Assert.Equal("curitiba", model.SelectedCityId);
         Assert.Equal(27, model.Capitals.Count);
     }
 

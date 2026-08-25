@@ -38,8 +38,8 @@ public class BrazilianCapitalsTests
     }
 
     [Fact]
-    public void Default_IsSaoPaulo()
+    public void Default_IsCuritiba()
     {
-        Assert.Equal("sao-paulo", BrazilianCapitals.Default.Id);
+        Assert.Equal("curitiba", BrazilianCapitals.Default.Id);
     }
 }

@@ -40,7 +40,7 @@ public class OpenWeatherMapClientTests
         var record = await client.GetCurrentWeatherAsync(BrazilianCapitals.Default);
 
         Assert.NotNull(record);
-        Assert.Equal("sao-paulo", record!.CityId);
+        Assert.Equal("curitiba", record!.CityId);
         Assert.Equal(25.5, record.TemperatureC);
         Assert.Equal(60, record.HumidityPercent);
         Assert.Equal(3.6, record.WindSpeedMs);
