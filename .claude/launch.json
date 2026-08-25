@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "weather-dashboard-web",
+      "runtimeExecutable": "dotnet",
+      "runtimeArgs": ["run", "--project", "src/WeatherDashboard.Web", "--launch-profile", "http"],
+      "port": 5170
+    }
+  ]
+}
