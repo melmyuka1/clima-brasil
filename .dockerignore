@@ -1,0 +1,10 @@
+**/bin/
+**/obj/
+**/.vs/
+**/.vscode/
+.git/
+.github/
+.claude/
+.agents/
+docs/img/*.svg
+*.md
