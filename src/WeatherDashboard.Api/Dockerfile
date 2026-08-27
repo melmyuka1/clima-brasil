@@ -28,5 +28,13 @@ COPY --from=build /app/publish .
 # Provedores como Render/Railway injetam a porta real via $PORT em tempo de
 # execução; 8080 é só o padrão para rodar localmente com `docker run`.
 ENV ASPNETCORE_ENVIRONMENT=Production
+
+# Desliga o FileSystemWatcher que recarrega o appsettings.json em mudanças.
+# Containers de PaaS gratuitos (ex.: Render) têm limite baixo de inotify e o
+# watcher padrão derruba o processo no startup com "IOException: user limit
+# on inotify instances reached". A config nunca muda em runtime aqui, então
+# o reload automático não faz falta.
+ENV DOTNET_hostBuilder__reloadConfigOnChange=false
+
 EXPOSE 8080
 ENTRYPOINT ["sh", "-c", "ASPNETCORE_URLS=http://+:${PORT:-8080} dotnet WeatherDashboard.Api.dll"]
