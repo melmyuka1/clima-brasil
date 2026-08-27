@@ -1,14 +1,21 @@
 # Clima Brasil
 
-Dashboard web com o histórico climático das capitais dos estados brasileiros,
-construído em **ASP.NET Core MVC (.NET 9 / C#)**. Os dados são coletados
-periodicamente da [OpenWeatherMap](https://openweathermap.org/current) e
-persistidos em banco de dados (EF Core InMemory) para consulta histórica.
+Dashboard web com o histórico climático da Região Metropolitana de Curitiba e
+das capitais dos estados brasileiros, construído em **ASP.NET Core MVC
+(.NET 9 / C#)**. Os dados são coletados periodicamente da
+[OpenWeatherMap](https://openweathermap.org/current) e persistidos em banco
+de dados (EF Core InMemory) para consulta histórica.
 
 ## Funcionalidades
 
-- Seleção de qualquer uma das 27 capitais (26 estados + Distrito Federal).
-- Coleta automática em background a cada 15 minutos, para todas as capitais.
+- Cidade padrão e tira de destaque com os municípios que fazem fronteira com
+  Curitiba (Colombo, Pinhais, São José dos Pinhais, Araucária, Campo Largo,
+  Fazenda Rio Grande, Quatro Barras e Piraquara); botão "Ver capitais" alterna
+  a tira de destaque para as capitais estaduais.
+- Seletor de cidade com os 29 municípios da Região Metropolitana de Curitiba
+  e as 27 capitais estaduais (26 estados + Distrito Federal).
+- Coleta automática em background a cada 15 minutos, para todas as 55 cidades
+  rastreadas.
 - Filtro por data inicial/final sobre o histórico coletado.
 - Dois gráficos: temperatura (mín/média/máx) por dia, e umidade × vento
   médios por dia.

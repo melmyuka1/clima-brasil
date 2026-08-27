@@ -36,10 +36,4 @@ public class BrazilianCapitalsTests
     {
         Assert.Null(BrazilianCapitals.FindById("atlantis"));
     }
-
-    [Fact]
-    public void Default_IsCuritiba()
-    {
-        Assert.Equal("curitiba", BrazilianCapitals.Default.Id);
-    }
 }

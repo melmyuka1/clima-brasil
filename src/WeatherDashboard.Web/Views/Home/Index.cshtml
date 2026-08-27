@@ -30,12 +30,23 @@
             <div class="field">
                 <label for="city-select">Cidade</label>
                 <select id="city-select" name="city" class="input">
-                    @foreach (var capital in Model.Capitals)
-                    {
-                        <option value="@capital.Id" selected="@(capital.Id == Model.SelectedCityId)">
-                            @capital.City / @capital.Uf
-                        </option>
-                    }
+                    <optgroup label="Região Metropolitana de Curitiba">
+                        @foreach (var city in Model.MetroCities)
+                        {
+                            <option value="@city.Id" selected="@(city.Id == Model.SelectedCityId)">
+                                @city.City
+                            </option>
+                        }
+                    </optgroup>
+                    <optgroup label="Capitais">
+                        @* Curitiba já aparece no grupo da região metropolitana acima — evita listá-la duas vezes. *@
+                        @foreach (var capital in Model.Capitals.Where(c => c.Id != "curitiba"))
+                        {
+                            <option value="@capital.Id" selected="@(capital.Id == Model.SelectedCityId)">
+                                @capital.City / @capital.Uf
+                            </option>
+                        }
+                    </optgroup>
                 </select>
             </div>
             <div class="field">
@@ -52,7 +63,12 @@
         </form>
     </header>
 
-    <nav class="highlights-strip scroll-x" id="highlights-strip" aria-label="Capitais em destaque"></nav>
+    <div class="highlights-row">
+        <nav class="highlights-strip scroll-x" id="highlights-strip" aria-label="Cidades em destaque"></nav>
+        <button type="button" class="btn btn-secondary highlights-toggle" id="highlights-toggle">
+            <i class="ph ph-buildings"></i> <span id="highlights-toggle-label">Ver capitais</span>
+        </button>
+    </div>
 
     <section class="current-weather-card card elev-md" id="current-card" aria-live="polite">
         <div class="current-weather-loading text-muted">

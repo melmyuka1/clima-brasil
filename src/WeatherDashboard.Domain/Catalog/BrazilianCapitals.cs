@@ -9,7 +9,7 @@ namespace WeatherDashboard.Domain.Catalog;
 /// </summary>
 public static class BrazilianCapitals
 {
-    public static readonly IReadOnlyList<BrazilianCapital> All = new List<BrazilianCapital>
+    public static readonly IReadOnlyList<TrackedCity> All = new List<TrackedCity>
     {
         new() { Id = "rio-branco", City = "Rio Branco", Uf = "AC", State = "Acre", Latitude = -9.97499, Longitude = -67.8243 },
         new() { Id = "maceio", City = "Maceió", Uf = "AL", State = "Alagoas", Latitude = -9.66599, Longitude = -35.735 },
@@ -40,9 +40,6 @@ public static class BrazilianCapitals
         new() { Id = "palmas", City = "Palmas", Uf = "TO", State = "Tocantins", Latitude = -10.1689, Longitude = -48.3317 },
     };
 
-    public static BrazilianCapital? FindById(string id) =>
+    public static TrackedCity? FindById(string id) =>
         All.FirstOrDefault(c => c.Id.Equals(id, StringComparison.OrdinalIgnoreCase));
-
-    /// <summary>Cidade principal exibida por padrão ao abrir o dashboard.</summary>
-    public static readonly BrazilianCapital Default = All.Single(c => c.Id == "curitiba");
 }

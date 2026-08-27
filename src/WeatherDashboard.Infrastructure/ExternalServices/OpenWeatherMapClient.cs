@@ -25,16 +25,16 @@ public class OpenWeatherMapClient : IWeatherApiClient
         _logger = logger;
     }
 
-    public async Task<WeatherRecord?> GetCurrentWeatherAsync(BrazilianCapital capital, CancellationToken cancellationToken = default)
+    public async Task<WeatherRecord?> GetCurrentWeatherAsync(TrackedCity city, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(_options.ApiKey))
         {
-            _logger.LogWarning("OpenWeatherMap:ApiKey não configurada. Pulando coleta para {City}.", capital.City);
+            _logger.LogWarning("OpenWeatherMap:ApiKey não configurada. Pulando coleta para {City}.", city.City);
             return null;
         }
 
-        var lat = capital.Latitude.ToString(System.Globalization.CultureInfo.InvariantCulture);
-        var lon = capital.Longitude.ToString(System.Globalization.CultureInfo.InvariantCulture);
+        var lat = city.Latitude.ToString(System.Globalization.CultureInfo.InvariantCulture);
+        var lon = city.Longitude.ToString(System.Globalization.CultureInfo.InvariantCulture);
         var url = $"{_options.BaseUrl}?lat={lat}&lon={lon}&appid={_options.ApiKey}&units={_options.Units}&lang={_options.Language}";
 
         try
@@ -43,14 +43,14 @@ public class OpenWeatherMapClient : IWeatherApiClient
             if (!response.IsSuccessStatusCode)
             {
                 _logger.LogWarning(
-                    "OpenWeatherMap retornou {StatusCode} para {City}.", response.StatusCode, capital.City);
+                    "OpenWeatherMap retornou {StatusCode} para {City}.", response.StatusCode, city.City);
                 return null;
             }
 
             var payload = await response.Content.ReadFromJsonAsync<OpenWeatherMapResponse>(cancellationToken: cancellationToken);
             if (payload?.Main is null)
             {
-                _logger.LogWarning("Resposta da OpenWeatherMap sem dados de 'main' para {City}.", capital.City);
+                _logger.LogWarning("Resposta da OpenWeatherMap sem dados de 'main' para {City}.", city.City);
                 return null;
             }
 
@@ -61,9 +61,9 @@ public class OpenWeatherMapClient : IWeatherApiClient
 
             return new WeatherRecord
             {
-                CityId = capital.Id,
-                CityName = capital.City,
-                Uf = capital.Uf,
+                CityId = city.Id,
+                CityName = city.City,
+                Uf = city.Uf,
                 ObservedAtUtc = observedAtUtc,
                 CollectedAtUtc = DateTime.UtcNow,
                 TemperatureC = payload.Main.Temp,
@@ -82,7 +82,7 @@ public class OpenWeatherMapClient : IWeatherApiClient
         }
         catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or System.Text.Json.JsonException)
         {
-            _logger.LogWarning(ex, "Falha ao consultar clima para {City}.", capital.City);
+            _logger.LogWarning(ex, "Falha ao consultar clima para {City}.", city.City);
             return null;
         }
     }

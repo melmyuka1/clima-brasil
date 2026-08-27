@@ -12,5 +12,5 @@ public interface IWeatherApiClient
     /// Busca a condição climática atual para uma coordenada. Retorna null quando a chamada
     /// falha (erro de rede, chave inválida, rate limit) — o chamador decide como lidar com isso.
     /// </summary>
-    Task<WeatherRecord?> GetCurrentWeatherAsync(BrazilianCapital capital, CancellationToken cancellationToken = default);
+    Task<WeatherRecord?> GetCurrentWeatherAsync(TrackedCity city, CancellationToken cancellationToken = default);
 }

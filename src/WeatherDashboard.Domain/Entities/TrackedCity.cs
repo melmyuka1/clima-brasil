@@ -1,10 +1,11 @@
 namespace WeatherDashboard.Domain.Entities;
 
 /// <summary>
-/// Uma capital de estado brasileira. Catálogo estático usado tanto para a coleta
-/// periódica de dados quanto para popular o seletor de cidades no dashboard.
+/// Uma cidade rastreada pela aplicação (capital de estado ou município da região
+/// metropolitana de Curitiba). Catálogo estático usado tanto para a coleta periódica
+/// de dados quanto para popular os seletores de cidade no dashboard.
 /// </summary>
-public sealed class BrazilianCapital
+public sealed class TrackedCity
 {
     public required string Id { get; init; }
     public required string City { get; init; }

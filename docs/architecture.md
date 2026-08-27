@@ -7,7 +7,7 @@ Architecture simplificada), mais um projeto de testes:
 
 | Projeto | Responsabilidade | Depende de |
 |---|---|---|
-| `WeatherDashboard.Domain` | Entidades, interfaces (contratos), regras de negócio puras (cálculo de estatísticas), catálogo de capitais | nada (sem dependências externas) |
+| `WeatherDashboard.Domain` | Entidades, interfaces (contratos), regras de negócio puras (cálculo de estatísticas), catálogos de cidades (capitais + Região Metropolitana de Curitiba) | nada (sem dependências externas) |
 | `WeatherDashboard.Infrastructure` | EF Core (InMemory), cliente HTTP da OpenWeatherMap, serviço em background que coleta dados a cada 15 min | `Domain` |
 | `WeatherDashboard.Web` | Controllers MVC, Views Razor, wwwroot (CSS/JS próprios, sem frameworks de UI prontos) | `Infrastructure`, `Domain` |
 | `WeatherDashboard.Tests` | Testes unitários (xUnit + Moq) | todos os anteriores |
@@ -29,10 +29,10 @@ graph TD
     end
 
     subgraph Domain["WeatherDashboard.Domain"]
-        Entities["Entities: WeatherRecord, BrazilianCapital"]
+        Entities["Entities: WeatherRecord, TrackedCity"]
         Interfaces["IWeatherApiClient / IWeatherRecordRepository"]
         Services["WeatherStatsCalculator (regras puras)"]
-        Catalog["BrazilianCapitals (27 capitais)"]
+        Catalog["TrackedCities = BrazilianCapitals (27) ∪ CuritibaMetroRegion (29)"]
     end
 
     subgraph Infra["WeatherDashboard.Infrastructure"]
@@ -81,7 +81,7 @@ graph LR
     Browser <-- "HTTPS/HTTP" --> WebApp
     WebApp <--> MemDb
     BgService <--> MemDb
-    BgService -- "HTTPS, a cada 15 min, 27 chamadas (1 por capital)" --> OWM
+    BgService -- "HTTPS, a cada 15 min, 55 chamadas (1 por cidade rastreada)" --> OWM
 ```
 
 **Observação sobre o banco em memória:** como recomendado no enunciado, o
@@ -105,8 +105,8 @@ sequenceDiagram
 
     loop a cada 15 minutos (e uma vez ao iniciar)
         Timer->>Collector: tick
-        loop para cada uma das 27 capitais
-            Collector->>Client: GetCurrentWeatherAsync(capital)
+        loop para cada uma das 55 cidades rastreadas (27 capitais + 29 da RMC, Curitiba não duplicada)
+            Collector->>Client: GetCurrentWeatherAsync(city)
             Client->>OWM: GET /data/2.5/weather?lat&lon&appid
             OWM-->>Client: JSON com clima atual
             Client-->>Collector: WeatherRecord (ou null em caso de falha)
@@ -116,13 +116,14 @@ sequenceDiagram
     end
 ```
 
-Falhas de rede, chave inválida ou rate limit em uma capital são logadas e
-**não** interrompem o ciclo — as demais capitais continuam sendo coletadas.
+Falhas de rede, chave inválida ou rate limit em uma cidade são logadas e
+**não** interrompem o ciclo — as demais cidades continuam sendo coletadas.
 
 ## Fluxo de leitura do dashboard
 
 1. `GET /` (`HomeController.Index`) renderiza a página com o seletor de
-   capitais e os filtros de data (padrão: últimos 7 dias).
+   cidades (agrupado em "Região Metropolitana de Curitiba" e "Capitais") e os
+   filtros de data (padrão: últimos 7 dias). A cidade padrão é Curitiba.
 2. O JavaScript (`wwwroot/js/dashboard.js`) faz `fetch` em
    `GET /Home/Data?city=...&start=...&end=...`.
 3. `HomeController.Data` busca os registros do período no repositório e usa
@@ -137,7 +138,21 @@ Falhas de rede, chave inválida ou rate limit em uma capital são logadas e
 ## Principais decisões e suposições
 
 - **MVC, não Razor Pages/Blazor**: solicitado explicitamente.
-- **Coleta para todas as 27 capitais a cada ciclo**, não apenas a
+- **Região Metropolitana de Curitiba como catálogo principal**: o requisito
+  do enunciado pede a seleção a partir das capitais estaduais, mas o uso real
+  do dashboard prioriza os municípios da RMC — por isso a tira de destaque e a
+  cidade padrão (Curitiba) mostram a RMC ao abrir a aplicação, com um botão
+  "Ver capitais" para alternar para o conjunto de capitais estaduais, mantendo
+  o requisito original disponível. O seletor de cidade sempre lista os dois
+  catálogos (`TrackedCities`, a união de `CuritibaMetroRegion` e
+  `BrazilianCapitals`), então qualquer uma das 55 cidades pode ser escolhida
+  independentemente de qual conjunto está em destaque.
+- **Destaque só das cidades que fazem fronteira com Curitiba** (9 de 29
+  municípios da RMC): Colombo, Pinhais, São José dos Pinhais, Araucária,
+  Campo Largo, Fazenda Rio Grande, Quatro Barras e Piraquara, além da própria
+  Curitiba — os demais 20 municípios da região continuam selecionáveis pelo
+  dropdown, só não aparecem na tira de atalhos.
+- **Coleta para todas as 55 cidades rastreadas a cada ciclo**, não apenas a
   selecionada: o requisito pede atualização a cada 15 min e permitir trocar de
   cidade livremente: pré-coletar todas evita telas vazias ao trocar o filtro e
   fica dentro do limite gratuito da OpenWeatherMap (60 chamadas/min).

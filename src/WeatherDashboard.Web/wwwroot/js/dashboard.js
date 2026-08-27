@@ -15,6 +15,8 @@
     var emptyState = document.getElementById("empty-state");
     var chartsGrid = document.querySelector(".charts-grid");
     var highlightsStrip = document.getElementById("highlights-strip");
+    var highlightsToggle = document.getElementById("highlights-toggle");
+    var highlightsToggleLabel = document.getElementById("highlights-toggle-label");
     var dayStripCard = document.getElementById("day-strip-card");
     var dayStrip = document.getElementById("day-strip");
     var skyBackdrop = document.getElementById("sky-backdrop");
@@ -106,11 +108,16 @@
         unit = evt.target.value;
         localStorage.setItem(UNIT_STORAGE_KEY, unit);
         if (lastData) renderAll(lastData);
+        renderHighlights();
     });
 
-    // ---------- Tira de capitais em destaque ----------
+    // ---------- Tira de cidades em destaque (Região Metropolitana de Curitiba ⇄ Capitais) ----------
 
-    function renderHighlights(items) {
+    var highlightsData = { metroCities: [], capitals: [] };
+    var highlightsView = "metro"; // sempre inicia mostrando a RMC ao acessar a aplicação
+
+    function renderHighlights() {
+        var items = highlightsView === "metro" ? highlightsData.metroCities : highlightsData.capitals;
         highlightsStrip.innerHTML = items
             .map(function (item) {
                 var active = item.cityId === citySelect.value;
@@ -128,8 +135,11 @@
 
     function loadHighlights() {
         fetch(highlightsUrl)
-            .then(function (r) { return r.ok ? r.json() : []; })
-            .then(renderHighlights)
+            .then(function (r) { return r.ok ? r.json() : { metroCities: [], capitals: [] }; })
+            .then(function (data) {
+                highlightsData = data;
+                renderHighlights();
+            })
             .catch(function () { /* tira de destaque é cosmética; falha aqui não deve incomodar o usuário */ });
     }
 
@@ -138,6 +148,12 @@
         if (!chip) return;
         citySelect.value = chip.dataset.city;
         loadData();
+    });
+
+    highlightsToggle.addEventListener("click", function () {
+        highlightsView = highlightsView === "metro" ? "capitals" : "metro";
+        highlightsToggleLabel.textContent = highlightsView === "metro" ? "Ver capitais" : "Ver região metropolitana";
+        renderHighlights();
     });
 
     // ---------- Cartão de clima atual ----------

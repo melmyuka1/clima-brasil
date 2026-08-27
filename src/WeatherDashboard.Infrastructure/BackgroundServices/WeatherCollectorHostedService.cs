@@ -9,8 +9,9 @@ namespace WeatherDashboard.Infrastructure.BackgroundServices;
 
 /// <summary>
 /// Serviço em background que, a cada N minutos (padrão: 15), consulta a condição climática
-/// atual de todas as capitais brasileiras e grava cada leitura como um novo registro histórico.
-/// Roda uma coleta imediatamente na inicialização para que o dashboard já tenha dados ao subir.
+/// atual de todas as cidades rastreadas (capitais estaduais + Região Metropolitana de Curitiba)
+/// e grava cada leitura como um novo registro histórico. Roda uma coleta imediatamente na
+/// inicialização para que o dashboard já tenha dados ao subir.
 /// </summary>
 public class WeatherCollectorHostedService : BackgroundService
 {
@@ -35,21 +36,21 @@ public class WeatherCollectorHostedService : BackgroundService
 
         do
         {
-            await CollectAllCapitalsAsync(stoppingToken);
+            await CollectAllCitiesAsync(stoppingToken);
         }
         while (!stoppingToken.IsCancellationRequested && await timer.WaitForNextTickAsync(stoppingToken));
     }
 
-    private async Task CollectAllCapitalsAsync(CancellationToken stoppingToken)
+    private async Task CollectAllCitiesAsync(CancellationToken stoppingToken)
     {
-        _logger.LogInformation("Iniciando ciclo de coleta climática para {Count} capitais.", BrazilianCapitals.All.Count);
+        _logger.LogInformation("Iniciando ciclo de coleta climática para {Count} cidades.", TrackedCities.All.Count);
 
         using var scope = _scopeFactory.CreateScope();
         var apiClient = scope.ServiceProvider.GetRequiredService<IWeatherApiClient>();
         var repository = scope.ServiceProvider.GetRequiredService<IWeatherRecordRepository>();
 
         var collected = 0;
-        foreach (var capital in BrazilianCapitals.All)
+        foreach (var city in TrackedCities.All)
         {
             if (stoppingToken.IsCancellationRequested)
             {
@@ -58,7 +59,7 @@ public class WeatherCollectorHostedService : BackgroundService
 
             try
             {
-                var record = await apiClient.GetCurrentWeatherAsync(capital, stoppingToken);
+                var record = await apiClient.GetCurrentWeatherAsync(city, stoppingToken);
                 if (record is not null)
                 {
                     await repository.AddAsync(record, stoppingToken);
@@ -67,10 +68,10 @@ public class WeatherCollectorHostedService : BackgroundService
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro inesperado ao coletar clima de {City}.", capital.City);
+                _logger.LogError(ex, "Erro inesperado ao coletar clima de {City}.", city.City);
             }
         }
 
-        _logger.LogInformation("Ciclo de coleta concluído: {Collected}/{Total} capitais.", collected, BrazilianCapitals.All.Count);
+        _logger.LogInformation("Ciclo de coleta concluído: {Collected}/{Total} cidades.", collected, TrackedCities.All.Count);
     }
 }

@@ -38,7 +38,7 @@ public class OpenWeatherMapClientTests
     {
         var client = CreateClient(new FakeHttpMessageHandler(HttpStatusCode.OK, SampleJson));
 
-        var record = await client.GetCurrentWeatherAsync(BrazilianCapitals.Default);
+        var record = await client.GetCurrentWeatherAsync(TrackedCities.Default);
 
         Assert.NotNull(record);
         Assert.Equal("curitiba", record!.CityId);
@@ -58,7 +58,7 @@ public class OpenWeatherMapClientTests
             new FakeHttpMessageHandler(HttpStatusCode.OK, SampleJson),
             new OpenWeatherMapOptions { ApiKey = "" });
 
-        var record = await client.GetCurrentWeatherAsync(BrazilianCapitals.Default);
+        var record = await client.GetCurrentWeatherAsync(TrackedCities.Default);
 
         Assert.Null(record);
     }
@@ -68,7 +68,7 @@ public class OpenWeatherMapClientTests
     {
         var client = CreateClient(new FakeHttpMessageHandler(HttpStatusCode.Unauthorized, null));
 
-        var record = await client.GetCurrentWeatherAsync(BrazilianCapitals.Default);
+        var record = await client.GetCurrentWeatherAsync(TrackedCities.Default);
 
         Assert.Null(record);
     }
@@ -78,7 +78,7 @@ public class OpenWeatherMapClientTests
     {
         var client = CreateClient(new FakeHttpMessageHandler(new HttpRequestException("boom")));
 
-        var record = await client.GetCurrentWeatherAsync(BrazilianCapitals.Default);
+        var record = await client.GetCurrentWeatherAsync(TrackedCities.Default);
 
         Assert.Null(record);
     }

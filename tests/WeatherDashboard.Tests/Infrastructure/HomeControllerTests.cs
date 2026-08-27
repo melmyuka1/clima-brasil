@@ -34,7 +34,7 @@ public class HomeControllerTests
         new(repositoryMock.Object, NullLogger<HomeController>.Instance);
 
     [Fact]
-    public void Index_ReturnsDefaultCapitalWhenNoneSelected()
+    public void Index_DefaultsToCuritibaAndExposesBothCityCatalogs()
     {
         var controller = CreateController(new Mock<IWeatherRecordRepository>());
 
@@ -43,6 +43,18 @@ public class HomeControllerTests
 
         Assert.Equal("curitiba", model.SelectedCityId);
         Assert.Equal(27, model.Capitals.Count);
+        Assert.Equal(29, model.MetroCities.Count);
+    }
+
+    [Fact]
+    public void Index_ResolvesSelectedCityFromMetroRegionCatalog()
+    {
+        var controller = CreateController(new Mock<IWeatherRecordRepository>());
+
+        var result = Assert.IsType<ViewResult>(controller.Index(city: "colombo"));
+        var model = Assert.IsType<DashboardIndexViewModel>(result.Model);
+
+        Assert.Equal("colombo", model.SelectedCityId);
     }
 
     [Fact]
@@ -85,5 +97,24 @@ public class HomeControllerTests
         Assert.Equal("São Paulo", response.CityName);
         Assert.Single(response.DailySeries);
         Assert.Equal(24, response.Today.CurrentTempC);
+    }
+
+    [Fact]
+    public async Task Highlights_ReturnsMetroBorderCitiesAndCuratedCapitals()
+    {
+        var repositoryMock = new Mock<IWeatherRecordRepository>();
+        repositoryMock
+            .Setup(r => r.GetByCityAndRangeAsync(It.IsAny<string>(), It.IsAny<DateOnly>(), It.IsAny<DateOnly>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<WeatherRecord>());
+
+        var controller = CreateController(repositoryMock);
+
+        var result = await controller.Highlights(CancellationToken.None);
+
+        var jsonResult = Assert.IsType<JsonResult>(result);
+        var response = Assert.IsType<HighlightsResponse>(jsonResult.Value);
+        Assert.Equal(9, response.MetroCities.Count);
+        Assert.Equal("curitiba", response.MetroCities[0].CityId);
+        Assert.Equal(8, response.Capitals.Count);
     }
 }

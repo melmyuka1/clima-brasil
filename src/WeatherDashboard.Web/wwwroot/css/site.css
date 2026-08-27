@@ -81,12 +81,25 @@ body {
 
 .btn-apply { flex: none; }
 
-/* ---------- Tira de capitais em destaque ---------- */
+/* ---------- Tira de cidades em destaque ---------- */
+
+.highlights-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.highlights-toggle {
+  flex: none;
+  white-space: nowrap;
+}
 
 .highlights-strip {
   display: flex;
   gap: var(--space-2);
   padding: 2px 2px var(--space-2);
+  flex: 1;
+  min-width: 0;
 }
 
 .highlight-chip {
