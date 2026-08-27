@@ -32,7 +32,8 @@ public class HomeController : Controller
             SelectedCityId = selected.Id,
             DefaultStart = today.AddDays(-6),
             DefaultEnd = today,
-            ApiBaseUrl = _configuration["WeatherApi:BaseUrl"] ?? "http://localhost:5282",
+            ApiBaseUrlHttp = _configuration["WeatherApi:BaseUrlHttp"] ?? "http://localhost:5282",
+            ApiBaseUrlHttps = _configuration["WeatherApi:BaseUrlHttps"] ?? "https://localhost:7222",
         };
 
         return View(viewModel);

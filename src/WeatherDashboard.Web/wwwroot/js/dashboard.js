@@ -5,8 +5,9 @@
     if (!root) return;
 
     // O histórico climático mora na API separada (WeatherDashboard.Api), consumida direto do
-    // navegador — a URL base vem do servidor (config "WeatherApi:BaseUrl"), o resto é fixo.
-    var apiBaseUrl = root.dataset.apiBaseUrl;
+    // navegador. Usa a URL da API no mesmo protocolo da própria página (http/https) — misturar
+    // os dois é bloqueado como "conteúdo misto" por navegadores como o Firefox.
+    var apiBaseUrl = window.location.protocol === "https:" ? root.dataset.apiBaseUrlHttps : root.dataset.apiBaseUrlHttp;
     var dataUrl = apiBaseUrl + "/api/weather/data";
     var highlightsUrl = apiBaseUrl + "/api/weather/highlights";
     var citySelect = document.getElementById("city-select");

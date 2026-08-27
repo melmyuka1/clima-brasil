@@ -8,14 +8,13 @@ namespace WeatherDashboard.Tests.Infrastructure;
 
 public class HomeControllerTests
 {
-    private static HomeController CreateController(string? apiBaseUrl = null)
+    private static HomeController CreateController(string? apiBaseUrlHttp = null, string? apiBaseUrlHttps = null)
     {
-        var configuration = new ConfigurationBuilder()
-            .AddInMemoryCollection(apiBaseUrl is null
-                ? []
-                : new Dictionary<string, string?> { ["WeatherApi:BaseUrl"] = apiBaseUrl })
-            .Build();
+        var overrides = new Dictionary<string, string?>();
+        if (apiBaseUrlHttp is not null) overrides["WeatherApi:BaseUrlHttp"] = apiBaseUrlHttp;
+        if (apiBaseUrlHttps is not null) overrides["WeatherApi:BaseUrlHttps"] = apiBaseUrlHttps;
 
+        var configuration = new ConfigurationBuilder().AddInMemoryCollection(overrides).Build();
         return new HomeController(configuration);
     }
 
@@ -44,13 +43,16 @@ public class HomeControllerTests
     }
 
     [Fact]
-    public void Index_PassesConfiguredApiBaseUrlToTheView()
+    public void Index_PassesConfiguredApiBaseUrlsToTheView()
     {
-        var controller = CreateController(apiBaseUrl: "https://api.exemplo.com");
+        var controller = CreateController(
+            apiBaseUrlHttp: "http://api.exemplo.com",
+            apiBaseUrlHttps: "https://api.exemplo.com");
 
         var result = Assert.IsType<ViewResult>(controller.Index(city: null));
         var model = Assert.IsType<DashboardIndexViewModel>(result.Model);
 
-        Assert.Equal("https://api.exemplo.com", model.ApiBaseUrl);
+        Assert.Equal("http://api.exemplo.com", model.ApiBaseUrlHttp);
+        Assert.Equal("https://api.exemplo.com", model.ApiBaseUrlHttps);
     }
 }
