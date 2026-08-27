@@ -4,8 +4,11 @@
     var root = document.querySelector(".dashboard");
     if (!root) return;
 
-    var dataUrl = root.dataset.dataUrl;
-    var highlightsUrl = root.dataset.highlightsUrl;
+    // O histórico climático mora na API separada (WeatherDashboard.Api), consumida direto do
+    // navegador — a URL base vem do servidor (config "WeatherApi:BaseUrl"), o resto é fixo.
+    var apiBaseUrl = root.dataset.apiBaseUrl;
+    var dataUrl = apiBaseUrl + "/api/weather/data";
+    var highlightsUrl = apiBaseUrl + "/api/weather/highlights";
     var citySelect = document.getElementById("city-select");
     var startInput = document.getElementById("start-date");
     var endInput = document.getElementById("end-date");
@@ -19,7 +22,6 @@
     var highlightsToggleLabel = document.getElementById("highlights-toggle-label");
     var dayStripCard = document.getElementById("day-strip-card");
     var dayStrip = document.getElementById("day-strip");
-    var skyBackdrop = document.getElementById("sky-backdrop");
     var unitToggle = document.getElementById("unit-toggle");
 
     var temperatureChart = null;
@@ -74,28 +76,11 @@
         return "https://openweathermap.org/img/wn/" + (icon || "01d") + (size === "small" ? ".png" : "@2x.png");
     }
 
-    // ---------- Fundo dinâmico conforme a condição climática atual ----------
+    // ---------- Cena de fundo conforme a condição climática atual ----------
+    // (sol, nuvens, chuva/tempestade ou céu estrelado — ver wwwroot/js/weather-scene.js)
 
-    function skyGradientFor(icon) {
-        var code = (icon || "").slice(0, 2);
-        var isNight = (icon || "").endsWith("n");
-        var palettes = {
-            "01": isNight ? "rgba(150,140,255,.20)" : "rgba(255,196,90,.24)",
-            "02": isNight ? "rgba(130,130,190,.16)" : "rgba(255,205,140,.18)",
-            "03": "rgba(180,190,220,.14)",
-            "04": "rgba(150,158,190,.14)",
-            "09": "rgba(110,150,255,.18)",
-            "10": "rgba(110,150,255,.20)",
-            "11": "rgba(140,110,255,.22)",
-            "13": "rgba(220,235,255,.20)",
-            "50": "rgba(200,205,225,.12)",
-        };
-        var color = palettes[code] || "rgba(200,206,235,.14)";
-        return "radial-gradient(circle at 82% 6%, " + color + ", transparent 60%)";
-    }
-
-    function updateSkyBackdrop(icon) {
-        if (skyBackdrop) skyBackdrop.style.background = skyGradientFor(icon);
+    function updateWeatherScene(icon) {
+        if (window.WeatherScene) window.WeatherScene.render(icon);
     }
 
     // ---------- Toggle °C / °F (segmented control do Nocturne: .seg > .seg-opt > input[type=radio]) ----------
@@ -164,11 +149,11 @@
             currentCard.innerHTML =
                 '<div class="current-weather-error"><i class="ph ph-cloud-slash"></i> ' +
                 "Sem leitura registrada hoje para " + escapeHtml(data.cityName) + " ainda.</div>";
-            updateSkyBackdrop(null);
+            updateWeatherScene(null);
             return;
         }
 
-        updateSkyBackdrop(today.currentIcon);
+        updateWeatherScene(today.currentIcon);
 
         var details = [];
         if (today.currentFeelsLikeC !== null && today.currentFeelsLikeC !== undefined) {

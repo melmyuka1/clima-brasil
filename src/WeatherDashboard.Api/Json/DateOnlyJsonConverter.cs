@@ -1,7 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace WeatherDashboard.Web.Json;
+namespace WeatherDashboard.Api.Json;
 
 /// <summary>Serializa DateOnly como "yyyy-MM-dd", formato consumido pelo JavaScript do dashboard.</summary>
 public sealed class DateOnlyJsonConverter : JsonConverter<DateOnly>

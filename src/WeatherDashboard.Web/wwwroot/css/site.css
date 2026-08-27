@@ -16,17 +16,9 @@ body {
   min-height: 100vh;
 }
 
-/* Camada de "céu" atrás do conteúdo: um brilho radial cuja cor muda conforme
-   a condição climática atual — a única cor na página que foge da paleta do
-   design system de propósito, porque representa o clima em si, não a UI. */
-.sky-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  background: radial-gradient(circle at 82% 6%, color-mix(in srgb, var(--color-accent) 14%, transparent), transparent 60%);
-  transition: background 900ms ease;
-}
+/* A cena climática animada (chuva, nuvens, sol, céu estrelado) mora em
+   wwwroot/css/weather-scene.css — sua função é ser o pano de fundo atrás do
+   conteúdo, então aqui só garantimos que o dashboard fique por cima dela. */
 
 .dashboard {
   position: relative;

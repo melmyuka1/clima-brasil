@@ -1,8 +1,8 @@
 using WeatherDashboard.Domain.Dtos;
 
-namespace WeatherDashboard.Web.Models;
+namespace WeatherDashboard.Api.Models;
 
-/// <summary>Contrato JSON consumido pelo JavaScript do dashboard (wwwroot/js/dashboard.js).</summary>
+/// <summary>Série histórica agregada por dia e estatísticas do dia atual para uma cidade e período.</summary>
 public sealed class DashboardDataResponse
 {
     public required string CityId { get; init; }

@@ -6,6 +6,12 @@
       "runtimeExecutable": "dotnet",
       "runtimeArgs": ["run", "--project", "src/WeatherDashboard.Web", "--launch-profile", "http"],
       "port": 5170
+    },
+    {
+      "name": "weather-dashboard-api",
+      "runtimeExecutable": "dotnet",
+      "runtimeArgs": ["run", "--project", "src/WeatherDashboard.Api", "--launch-profile", "http"],
+      "port": 5282
     }
   ]
 }

@@ -24,6 +24,7 @@
     <ProjectReference Include="..\..\src\WeatherDashboard.Domain\WeatherDashboard.Domain.csproj" />
     <ProjectReference Include="..\..\src\WeatherDashboard.Infrastructure\WeatherDashboard.Infrastructure.csproj" />
     <ProjectReference Include="..\..\src\WeatherDashboard.Web\WeatherDashboard.Web.csproj" />
+    <ProjectReference Include="..\..\src\WeatherDashboard.Api\WeatherDashboard.Api.csproj" />
   </ItemGroup>
 
 </Project>

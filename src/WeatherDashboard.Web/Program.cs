@@ -1,13 +1,7 @@
-using WeatherDashboard.Infrastructure;
-using WeatherDashboard.Web.Json;
-
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllersWithViews()
-    .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new DateOnlyJsonConverter()));
-
-builder.Services.AddWeatherInfrastructure(builder.Configuration);
+builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
 

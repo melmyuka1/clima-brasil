@@ -1,6 +1,6 @@
-namespace WeatherDashboard.Web.Models;
+namespace WeatherDashboard.Api.Models;
 
-/// <summary>Um item da tira de destaque exibida sob o cabeçalho do dashboard.</summary>
+/// <summary>Leitura atual de uma cidade em destaque.</summary>
 public sealed class HighlightCityResponse
 {
     public required string CityId { get; init; }
@@ -12,8 +12,8 @@ public sealed class HighlightCityResponse
 }
 
 /// <summary>
-/// Os dois conjuntos que a tira de destaque pode exibir: a Região Metropolitana de Curitiba
-/// (padrão ao abrir o dashboard) e as capitais estaduais (alternadas pelo botão "Ver capitais").
+/// Os dois conjuntos que a tira de destaque do dashboard pode exibir: a Região Metropolitana
+/// de Curitiba (padrão) e as capitais estaduais (alternadas pelo botão "Ver capitais").
 /// </summary>
 public sealed class HighlightsResponse
 {

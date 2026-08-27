@@ -3,14 +3,13 @@
     ViewData["Title"] = "Dashboard";
 }
 
-<div class="sky-backdrop" id="sky-backdrop" aria-hidden="true"></div>
+<div class="weather-scene" id="weather-scene" aria-hidden="true"></div>
 
 <div class="dashboard"
      data-city="@Model.SelectedCityId"
      data-start="@Model.DefaultStart.ToString("yyyy-MM-dd")"
      data-end="@Model.DefaultEnd.ToString("yyyy-MM-dd")"
-     data-data-url="@Url.Action("Data", "Home")"
-     data-highlights-url="@Url.Action("Highlights", "Home")">
+     data-api-base-url="@Model.ApiBaseUrl">
 
     <header class="dashboard-header nav">
         <span class="nav-brand"><i class="ph ph-cloud-sun brand-icon"></i>Clima Brasil</span>
@@ -103,5 +102,6 @@
 
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+    <script src="~/js/weather-scene.js" asp-append-version="true"></script>
     <script src="~/js/dashboard.js" asp-append-version="true"></script>
 }

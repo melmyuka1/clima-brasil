@@ -1,0 +1,203 @@
+/* Cena climática animada atrás do dashboard — sol, nuvens, chuva/tempestade ou céu
+   estrelado, conforme o ícone da condição atual (ver wwwroot/js/weather-scene.js).
+   Paleta própria (não vem do design system Nocturne): representa o céu real, não a UI. */
+
+.weather-scene {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  transition: background 900ms ease;
+}
+
+/* ---------- Sol ---------- */
+
+.ws-sun {
+  position: absolute;
+  top: 10%;
+  right: 14%;
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 246, 213, 0.9) 0%, rgba(255, 224, 102, 0.75) 45%, rgba(255, 204, 51, 0.55) 100%);
+  box-shadow: 0 0 50px 16px rgba(255, 221, 87, 0.30), 0 0 110px 50px rgba(255, 221, 87, 0.16);
+  animation: ws-pulse 4s ease-in-out infinite;
+}
+
+@keyframes ws-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.06); }
+}
+
+.ws-rays {
+  position: absolute;
+  top: 10%;
+  right: 14%;
+  width: 90px;
+  height: 90px;
+  animation: ws-spin 70s linear infinite;
+}
+
+.ws-rays::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 220px;
+  height: 220px;
+  transform: translate(-50%, -50%);
+  background: repeating-conic-gradient(rgba(255, 224, 102, 0.16) 0deg 4deg, transparent 4deg 18deg);
+  border-radius: 50%;
+}
+
+@keyframes ws-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* ---------- Nuvens ---------- */
+
+.ws-cloud {
+  position: absolute;
+  background: rgba(233, 233, 237, 0.9);
+  border-radius: 100px;
+  animation-name: ws-float;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+
+.ws-cloud::before,
+.ws-cloud::after {
+  content: "";
+  position: absolute;
+  background: inherit;
+  border-radius: 100px;
+}
+
+.ws-cloud::before { width: 60%; height: 140%; top: -60%; left: 10%; }
+.ws-cloud::after { width: 45%; height: 110%; top: -45%; right: 10%; }
+
+@keyframes ws-float {
+  0% { transform: translateX(-15vw); }
+  50% { transform: translateX(95vw); }
+  100% { transform: translateX(-15vw); }
+}
+
+/* Cenas noturnas/nubladas usam nuvens mais escuras para não "brilhar" contra o céu escuro */
+.ws-night-cloudy .ws-cloud,
+.ws-rain .ws-cloud,
+.ws-storm .ws-cloud {
+  background: rgba(120, 130, 170, 0.5);
+}
+
+/* ---------- Estrelas (noite limpa) ---------- */
+
+.ws-star {
+  position: absolute;
+  border-radius: 50%;
+  background: #f3f5fe;
+  animation-name: ws-twinkle;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+
+@keyframes ws-twinkle {
+  0%, 100% { opacity: 0.25; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.15); }
+}
+
+/* ---------- Chuva ---------- */
+
+.ws-rain-layer {
+  position: absolute;
+  inset: 0;
+}
+
+.ws-rain-layer.ws-back-row {
+  opacity: 0.5;
+}
+
+.ws-drop {
+  position: absolute;
+  bottom: 100%;
+  width: 12px;
+  height: 90px;
+  animation-name: ws-drop-fall;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+@keyframes ws-drop-fall {
+  0% { transform: translateY(0); }
+  75% { transform: translateY(90vh); }
+  100% { transform: translateY(90vh); }
+}
+
+.ws-stem {
+  width: 1px;
+  height: 60%;
+  margin-left: 6px;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.3));
+  animation-name: ws-stem-fade;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+@keyframes ws-stem-fade {
+  0% { opacity: 1; }
+  65% { opacity: 1; }
+  75% { opacity: 0; }
+  100% { opacity: 0; }
+}
+
+.ws-splat {
+  width: 12px;
+  height: 8px;
+  border-top: 2px dotted rgba(255, 255, 255, 0.55);
+  border-radius: 50%;
+  transform: scale(0);
+  animation-name: ws-splat;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+@keyframes ws-splat {
+  0% { opacity: 1; transform: scale(0); }
+  80% { opacity: 1; transform: scale(0); }
+  90% { opacity: 0.5; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1.5); }
+}
+
+/* ---------- Tempestade: chuva mais densa + relâmpagos + fundo mais escuro ---------- */
+
+.ws-storm::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.28);
+  pointer-events: none;
+}
+
+.ws-flash {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 60% 15%, rgba(226, 230, 255, 0.9), transparent 55%);
+  opacity: 0;
+  animation: ws-flash 7s linear infinite;
+}
+
+@keyframes ws-flash {
+  0%, 88%, 100% { opacity: 0; }
+  90% { opacity: 0.85; }
+  92% { opacity: 0.1; }
+  94% { opacity: 0.7; }
+  97% { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .weather-scene * {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
