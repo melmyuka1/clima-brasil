@@ -34,6 +34,9 @@
     var lastData = null;
 
     var numberFormatter = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 1 });
+    var prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var lastDisplayedTemp = null;
+    var heroRevealed = false;
     var dayLabelFormatter = new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "2-digit" });
     var weekdayFormatter = new Intl.DateTimeFormat("pt-BR", { weekday: "short" });
     var dateTimeFormatter = new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short" });
@@ -75,6 +78,51 @@
 
     function iconUrl(icon, size) {
         return "https://openweathermap.org/img/wn/" + (icon || "01d") + (size === "small" ? ".png" : "@2x.png");
+    }
+
+    // Conta do valor anterior até o novo — só no número da temperatura em destaque, de propósito
+    // (um único momento de movimento, não um efeito espalhado pela tela).
+    function animateNumber(el, from, to, durationMs) {
+        if (!el) return;
+        if (prefersReducedMotion) {
+            el.textContent = numberFormatter.format(to);
+            return;
+        }
+        var start = null;
+        function step(ts) {
+            if (start === null) start = ts;
+            var progress = Math.min(1, (ts - start) / durationMs);
+            var eased = 1 - Math.pow(1 - progress, 3);
+            el.textContent = numberFormatter.format(from + (to - from) * eased);
+            if (progress < 1) requestAnimationFrame(step);
+        }
+        requestAnimationFrame(step);
+    }
+
+    // Arco do dia: um ponto se move de nascer a pôr do sol conforme a hora atual — a temperatura
+    // já diz "quanto", isso diz "em que momento do dia" sem precisar de mais dois textos soltos.
+    function buildSunArc(sunriseIso, sunsetIso) {
+        var sunrise = new Date(sunriseIso).getTime();
+        var sunset = new Date(sunsetIso).getTime();
+        var span = sunset - sunrise;
+        var progress = span > 0 ? (Date.now() - sunrise) / span : 0;
+        var isDaytime = progress >= 0 && progress <= 1;
+        var clamped = Math.max(0, Math.min(1, progress));
+        var theta = Math.PI * (1 - clamped);
+        var cx = (100 + 85 * Math.cos(theta)).toFixed(1);
+        var cy = (95 - 85 * Math.sin(theta)).toFixed(1);
+
+        return (
+            '<div class="sun-arc">' +
+            '<svg viewBox="0 0 200 108" aria-hidden="true">' +
+            '<path d="M15,95 A85,85 0 0 1 185,95" fill="none" stroke="var(--color-divider)" stroke-width="2"/>' +
+            '<circle cx="' + cx + '" cy="' + cy + '" r="7" class="sun-arc-dot' + (isDaytime ? "" : " is-night") + '"/>' +
+            "</svg>" +
+            '<div class="sun-arc-labels text-muted">' +
+            '<span><i class="ph ph-sun-horizon"></i> ' + timeFormatter.format(new Date(sunrise)) + "</span>" +
+            '<span>' + timeFormatter.format(new Date(sunset)) + ' <i class="ph ph-moon-stars"></i></span>' +
+            "</div></div>"
+        );
     }
 
     // ---------- Cena de fundo conforme a condição climática atual ----------
@@ -149,49 +197,46 @@
         if (!today || today.currentTempC === null || today.currentTempC === undefined) {
             currentCard.innerHTML =
                 '<div class="current-weather-error"><i class="ph ph-cloud-slash"></i> ' +
-                "Sem leitura registrada hoje para " + escapeHtml(data.cityName) + " ainda.</div>";
+                escapeHtml(data.cityName) + " ainda não tem leitura hoje. A próxima coleta chega em até 15 minutos.</div>";
             updateWeatherScene(null);
+            lastDisplayedTemp = null;
             return;
         }
 
         updateWeatherScene(today.currentIcon);
 
-        var details = [];
-        if (today.currentFeelsLikeC !== null && today.currentFeelsLikeC !== undefined) {
-            details.push(["ph-thermometer-simple", "Sensação térmica", fmtTemp(today.currentFeelsLikeC)]);
-        }
-        if (today.sunriseUtc) {
-            details.push(["ph-sun-horizon", "Nascer do sol", timeFormatter.format(new Date(today.sunriseUtc))]);
-        }
-        if (today.sunsetUtc) {
-            details.push(["ph-moon-stars", "Pôr do sol", timeFormatter.format(new Date(today.sunsetUtc))]);
-        }
-
-        var detailsHtml = details.length
-            ? '<div class="current-weather-secondary">' +
-              details
-                  .map(function (d) {
-                      return (
-                          '<div class="current-weather-detail"><i class="ph ' + d[0] + '"></i><span>' +
-                          '<span class="current-weather-detail-label text-muted">' + d[1] + "</span>" +
-                          '<span class="current-weather-detail-value">' + d[2] + "</span></span></div>"
-                      );
-                  })
-                  .join("") +
-              "</div>"
+        var feelsLikeHtml = today.currentFeelsLikeC !== null && today.currentFeelsLikeC !== undefined
+            ? '<div class="current-weather-detail"><i class="ph ph-thermometer-simple"></i><span>' +
+              '<span class="current-weather-detail-label text-muted">Sensação térmica</span>' +
+              '<span class="current-weather-detail-value">' + fmtTemp(today.currentFeelsLikeC) + "</span></span></div>"
             : "";
+
+        var arcHtml = today.sunriseUtc && today.sunsetUtc ? buildSunArc(today.sunriseUtc, today.sunsetUtc) : "";
+
+        var secondaryHtml = feelsLikeHtml || arcHtml
+            ? '<div class="current-weather-secondary">' + feelsLikeHtml + arcHtml + "</div>"
+            : "";
+
+        var displayTemp = toDisplayTemp(today.currentTempC);
+        var isFirstReveal = !heroRevealed;
+        heroRevealed = true;
+        var animFrom = lastDisplayedTemp !== null ? lastDisplayedTemp : displayTemp - 6;
 
         currentCard.innerHTML =
             '<img class="current-weather-icon" src="' + iconUrl(today.currentIcon) + '" alt="' + escapeHtml(today.currentDescription || "") + '" />' +
             '<div class="current-weather-main">' +
             '<div class="current-weather-location text-muted"><i class="ph ph-map-pin"></i> ' + escapeHtml(data.cityName) + " / " + escapeHtml(data.uf) + "</div>" +
-            '<div class="current-weather-temp">' + fmt(toDisplayTemp(today.currentTempC)) + "<span>°" + unit + "</span></div>" +
+            '<div class="current-weather-temp"><span id="hero-temp-value">' + numberFormatter.format(animFrom) + '</span><span>°' + unit + "</span></div>" +
             '<div class="current-weather-desc text-muted">' + escapeHtml(today.currentDescription || "") + "</div>" +
             "</div>" +
             '<div class="current-weather-updated text-muted">' +
             (today.lastUpdatedUtc ? "Atualizado em<br/>" + dateTimeFormatter.format(new Date(today.lastUpdatedUtc)) : "") +
             "</div>" +
-            detailsHtml;
+            secondaryHtml;
+
+        currentCard.classList.toggle("reveal-in", isFirstReveal && !prefersReducedMotion);
+        animateNumber(document.getElementById("hero-temp-value"), animFrom, displayTemp, 700);
+        lastDisplayedTemp = displayTemp;
     }
 
     function statCard(icon, label, value) {
@@ -343,10 +388,15 @@
     function loadData() {
         fetch(buildQuery())
             .then(function (response) {
-                if (!response.ok) throw new Error("Falha ao carregar dados (" + response.status + ")");
+                if (!response.ok) throw new Error("A API respondeu com erro " + response.status + ".");
                 return response.json();
             })
             .then(function (data) {
+                if (lastData && lastData.cityId !== data.cityId) {
+                    // cidade trocou: deixa a temperatura "revelar" de novo em vez de só atualizar
+                    heroRevealed = false;
+                    lastDisplayedTemp = null;
+                }
                 lastData = data;
                 renderAll(data);
 
@@ -355,7 +405,10 @@
                 window.history.replaceState({}, "", url);
             })
             .catch(function (err) {
-                currentCard.innerHTML = '<div class="current-weather-error"><i class="ph ph-warning"></i> ' + escapeHtml(err.message) + "</div>";
+                currentCard.innerHTML =
+                    '<div class="current-weather-error"><i class="ph ph-plugs"></i><span>' +
+                    "A API não respondeu.<br/>" +
+                    '<span class="text-muted">Confirme se WeatherDashboard.Api está rodando. (' + escapeHtml(err.message) + ")</span></span></div>";
             });
     }
 

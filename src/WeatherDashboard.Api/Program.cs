@@ -53,7 +53,11 @@ app.UseSwaggerUI(options =>
     options.RoutePrefix = "swagger";
 });
 
-app.UseHttpsRedirection();
+// Sem UseHttpsRedirection aqui de propósito: a Api escuta em http e https ao mesmo tempo, e o
+// JavaScript do site já escolhe a URL no protocolo certo (ver dashboard.js). Um redirect 307
+// numa requisição CORS cross-origin não carrega os headers de CORS, então o navegador bloqueia
+// a chamada mesmo que o destino final responda certo — forçar https aqui quebraria o próprio
+// mecanismo que evita "conteúdo misto".
 app.UseCors(WebClientCorsPolicy);
 app.UseAuthorization();
 app.MapControllers();
