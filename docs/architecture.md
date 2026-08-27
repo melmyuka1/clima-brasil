@@ -28,6 +28,11 @@ de InMemory) sem tocar em `Domain`, `Api` ou `Web`.
 
 ## Diagrama lógico (componentes)
 
+![Diagrama lógico da arquitetura: Web e Api dependem de Domain; Infrastructure implementa as interfaces de Domain e é usada pela Api](img/arquitetura-logica.svg)
+
+<details>
+<summary>Versão Mermaid (equivalente, texto-fonte editável)</summary>
+
 ```mermaid
 graph TD
     subgraph WebApp["WeatherDashboard.Web (ASP.NET Core MVC)"]
@@ -76,11 +81,18 @@ graph TD
     DbContext --> DB[("Banco em memória")]
 ```
 
+</details>
+
 O navegador chama a API **diretamente** (não passa pelo site) para buscar o
 histórico e os destaques — por isso a API tem CORS habilitado explicitamente
 para a origem do site (`Cors:AllowedOrigins` em `appsettings.json`).
 
 ## Diagrama físico (implantação)
+
+![Diagrama físico: navegador fala HTML/CSS/JS com o host do Web e fetch JSON com o host da Api; a Api chama a OpenWeatherMap a cada 15 minutos](img/arquitetura-fisica.svg)
+
+<details>
+<summary>Versão Mermaid (equivalente, texto-fonte editável)</summary>
 
 ```mermaid
 graph LR
@@ -108,6 +120,8 @@ graph LR
     BgService <--> MemDb
     BgService -- "HTTPS, a cada 15 min, 55 chamadas (1 por cidade rastreada)" --> OWM
 ```
+
+</details>
 
 Os dois processos podem ser implantados em hosts/portas diferentes sem
 mudança de código — a URL da API é configurável no `Web` via

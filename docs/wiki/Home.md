@@ -17,6 +17,8 @@ API (ASP.NET Core Web API + Swagger) que coleta os dados, e um site
   os testes e opções de deploy.
 - [Arquitetura](../architecture.md) — diagramas lógico e físico, decisões de
   design e suposições.
+- [Como Testar](Como-Testar.md) — o que os 39 testes automatizados cobrem, e
+  um roteiro manual pra validar dashboard, API e responsividade.
 
 ## Resumo do projeto
 

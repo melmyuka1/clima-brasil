@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 760" font-family="Segoe UI, Arial, sans-serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#555555"/>
+    </marker>
+  </defs>
+
+  <rect width="980" height="760" fill="#ffffff"/>
+  <text x="490" y="34" text-anchor="middle" font-size="22" font-weight="700" fill="#1b1e30">Clima Brasil — Arquitetura Lógica</text>
+
+  <!-- Browser -->
+  <rect x="380" y="56" width="220" height="44" rx="10" fill="#e7e5fe" stroke="#796cbf" stroke-width="1.5"/>
+  <text x="490" y="83" text-anchor="middle" font-size="14" fill="#2b2741">Navegador do usuário</text>
+
+  <!-- Web -->
+  <rect x="60" y="130" width="380" height="170" rx="12" fill="#eef2ff" stroke="#6c8bff" stroke-width="1.5"/>
+  <text x="250" y="154" text-anchor="middle" font-size="14" font-weight="700" fill="#1b1e30">WeatherDashboard.Web (MVC)</text>
+  <rect x="82" y="170" width="336" height="36" rx="8" fill="#ffffff" stroke="#b5abfc"/>
+  <text x="250" y="193" text-anchor="middle" font-size="12" fill="#2b2741">Razor Views (HTML/CSS próprios)</text>
+  <rect x="82" y="214" width="336" height="36" rx="8" fill="#ffffff" stroke="#b5abfc"/>
+  <text x="250" y="237" text-anchor="middle" font-size="12" fill="#2b2741">HomeController — só monta a página</text>
+  <rect x="82" y="258" width="336" height="36" rx="8" fill="#ffffff" stroke="#b5abfc"/>
+  <text x="250" y="281" text-anchor="middle" font-size="12" fill="#2b2741">dashboard.js / weather-scene.js</text>
+
+  <!-- Api -->
+  <rect x="560" y="130" width="380" height="170" rx="12" fill="#f5f0ff" stroke="#9184d9" stroke-width="1.5"/>
+  <text x="750" y="154" text-anchor="middle" font-size="14" font-weight="700" fill="#2b2741">WeatherDashboard.Api (Web API)</text>
+  <rect x="582" y="170" width="164" height="36" rx="8" fill="#ffffff" stroke="#b5abfc"/>
+  <text x="664" y="193" text-anchor="middle" font-size="12" fill="#2b2741">WeatherController</text>
+  <rect x="758" y="170" width="160" height="36" rx="8" fill="#ffffff" stroke="#b5abfc"/>
+  <text x="838" y="193" text-anchor="middle" font-size="12" fill="#2b2741">CitiesController</text>
+  <rect x="582" y="214" width="336" height="36" rx="8" fill="#fff4e5" stroke="#e0a24a"/>
+  <text x="750" y="237" text-anchor="middle" font-size="12" fill="#5a3d10">/swagger — documentação interativa</text>
+  <rect x="582" y="258" width="336" height="36" rx="8" fill="#ffffff" stroke="#b5abfc"/>
+  <text x="750" y="281" text-anchor="middle" font-size="12" fill="#2b2741">CORS liberado para a origem do Web</text>
+
+  <!-- Domain -->
+  <rect x="140" y="340" width="700" height="190" rx="12" fill="#eafaf0" stroke="#4caf7d" stroke-width="1.5"/>
+  <text x="490" y="364" text-anchor="middle" font-size="14" font-weight="700" fill="#1b3b28">WeatherDashboard.Domain — sem dependências externas</text>
+  <rect x="162" y="380" width="330" height="36" rx="8" fill="#ffffff" stroke="#8fd6ac"/>
+  <text x="327" y="403" text-anchor="middle" font-size="12" fill="#1b3b28">Entities: WeatherRecord, TrackedCity</text>
+  <rect x="506" y="380" width="310" height="36" rx="8" fill="#ffffff" stroke="#8fd6ac"/>
+  <text x="661" y="403" text-anchor="middle" font-size="12" fill="#1b3b28">IWeatherApiClient / IWeatherRecordRepository</text>
+  <rect x="162" y="424" width="330" height="36" rx="8" fill="#ffffff" stroke="#8fd6ac"/>
+  <text x="327" y="447" text-anchor="middle" font-size="12" fill="#1b3b28">WeatherStatsCalculator (regras puras)</text>
+  <rect x="506" y="424" width="310" height="36" rx="8" fill="#ffffff" stroke="#8fd6ac"/>
+  <text x="661" y="447" text-anchor="middle" font-size="12" fill="#1b3b28">TrackedCities (catálogos de cidade)</text>
+  <text x="490" y="490" text-anchor="middle" font-size="11.5" fill="#3d6b52" font-style="italic">Não conhece EF Core, HTTP ou ASP.NET — por isso é trivial de testar sem banco ou rede.</text>
+
+  <!-- Infrastructure -->
+  <rect x="60" y="570" width="380" height="160" rx="12" fill="#fff0f0" stroke="#e08a8a" stroke-width="1.5"/>
+  <text x="250" y="594" text-anchor="middle" font-size="14" font-weight="700" fill="#5a1b1b">WeatherDashboard.Infrastructure</text>
+  <rect x="82" y="610" width="336" height="34" rx="8" fill="#ffffff" stroke="#eab3b3"/>
+  <text x="250" y="631" text-anchor="middle" font-size="12" fill="#5a1b1b">WeatherCollectorHostedService</text>
+  <rect x="82" y="650" width="336" height="34" rx="8" fill="#ffffff" stroke="#eab3b3"/>
+  <text x="250" y="671" text-anchor="middle" font-size="12" fill="#5a1b1b">OpenWeatherMapClient</text>
+  <rect x="82" y="690" width="336" height="34" rx="8" fill="#ffffff" stroke="#eab3b3"/>
+  <text x="250" y="711" text-anchor="middle" font-size="12" fill="#5a1b1b">EfWeatherRecordRepository + WeatherDbContext</text>
+
+  <!-- External -->
+  <rect x="560" y="570" width="380" height="70" rx="10" fill="#f2f2f2" stroke="#9aa0a6" stroke-width="1.5"/>
+  <text x="750" y="598" text-anchor="middle" font-size="13" font-weight="700" fill="#3c4043">OpenWeatherMap</text>
+  <text x="750" y="618" text-anchor="middle" font-size="11.5" fill="#3c4043">Current Weather Data API</text>
+
+  <rect x="560" y="660" width="380" height="70" rx="10" fill="#f2f2f2" stroke="#9aa0a6" stroke-width="1.5"/>
+  <text x="750" y="688" text-anchor="middle" font-size="13" font-weight="700" fill="#3c4043">Banco em memória</text>
+  <text x="750" y="708" text-anchor="middle" font-size="11.5" fill="#3c4043">EF Core InMemory</text>
+
+  <!-- Arrows -->
+  <line x1="470" y1="100" x2="260" y2="130" stroke="#555555" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="335" y="119" font-size="11.5" fill="#555555">HTTP</text>
+
+  <line x1="510" y1="100" x2="720" y2="130" stroke="#555555" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="590" y="119" font-size="11.5" fill="#555555">fetch (CORS)</text>
+
+  <line x1="250" y1="300" x2="330" y2="340" stroke="#555555" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="240" y="325" font-size="11.5" fill="#555555">usa catálogos</text>
+
+  <line x1="750" y1="300" x2="650" y2="340" stroke="#555555" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="670" y="325" font-size="11.5" fill="#555555">usa</text>
+
+  <line x1="250" y1="570" x2="330" y2="530" stroke="#555555" stroke-width="1.5" stroke-dasharray="5,4" marker-end="url(#arrow)"/>
+  <text x="80" y="552" font-size="11.5" fill="#555555">implementa interfaces</text>
+
+  <line x1="440" y1="627" x2="560" y2="605" stroke="#555555" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="450" y="600" font-size="11.5" fill="#555555">HTTPS, a cada 15 min</text>
+
+  <line x1="440" y1="707" x2="560" y2="695" stroke="#555555" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="450" y="740" font-size="11.5" fill="#555555">EF Core</text>
+</svg>

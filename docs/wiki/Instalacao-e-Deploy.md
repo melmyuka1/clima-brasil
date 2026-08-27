@@ -92,9 +92,18 @@ API a cada 5 minutos, então novas coletas aparecem no dashboard sem precisar
 recarregar a página.
 
 Se o site e a API rodarem em portas diferentes das padrão, ajuste
-`WeatherApi:BaseUrl` em `src/WeatherDashboard.Web/appsettings.json` (URL que
-o navegador usa para chamar a API) e `Cors:AllowedOrigins` em
-`src/WeatherDashboard.Api/appsettings.json` (origens que a API aceita).
+`WeatherApi:BaseUrlHttp` / `BaseUrlHttps` em
+`src/WeatherDashboard.Web/appsettings.json` (URLs que o navegador usa para
+chamar a API — o JavaScript escolhe a que casa com o protocolo da própria
+página, pra não ser bloqueado como "conteúdo misto") e `Cors:AllowedOrigins`
+em `src/WeatherDashboard.Api/appsettings.json` (origens que a API aceita).
+
+> **Rodando via IDE (Visual Studio, Rider) em vez de `dotnet run`?** Garanta
+> que a `Api` suba com um perfil que escute nas duas portas (http **e**
+> https) — o perfil padrão do projeto já faz isso. Se só a porta http estiver
+> escutando e o site abrir em https (ou vice-versa), a chamada à API falha
+> com "NetworkError" (Firefox) ou "Failed to fetch" (Chrome) por conteúdo
+> misto — não é um bug de dados, é só as duas portas não combinando.
 
 ## 4. Rodar os testes automatizados
 
@@ -128,6 +137,34 @@ apontando de volta para a URL pública do `Web`.
 - **Azure App Service / qualquer PaaS com suporte a .NET 9**: dois App
   Services (um para a `Api`, um para o `Web`), publicando cada um via
   `dotnet publish` + deploy do pacote e configurando as variáveis acima.
+
+### Hospedagem gratuita (fora o GitHub)
+
+**GitHub Pages não serve para este projeto** — ele só hospeda site estático
+(HTML/CSS/JS puro, sem servidor por trás). Esta aplicação precisa rodar um
+processo .NET (a `Api`, com o coletor em background e o banco em memória), o
+que o GitHub Pages não suporta em nenhuma hipótese. Duas alternativas
+gratuitas que rodam um backend .NET de verdade:
+
+- **[Azure App Service](https://azure.microsoft.com/free/) — tier gratuito F1**:
+  opção mais "nativa" pra .NET (mesmo fabricante do framework). Cria-se um
+  App Service por projeto (`clima-brasil-api`, `clima-brasil-web`), plano
+  de preço **F1 (Free)**. Deploy direto do Visual Studio ("Publish" → Azure)
+  ou via `dotnet publish` + `az webapp deploy`. Configura-se a chave da
+  OpenWeatherMap e as URLs (`WeatherApi:BaseUrlHttps`, `Cors:AllowedOrigins`)
+  em "Configuration → Application settings" no portal, sem precisar tocar
+  no código. Limitação do F1: a app "dorme" após um tempo sem uso e demora
+  alguns segundos para acordar na próxima visita — normal em tier gratuito,
+  não é bug.
+- **[Render](https://render.com/) — Free Web Service**: alternativa fora do
+  ecossistema Microsoft, baseada em Docker (adicionar um `Dockerfile` simples
+  por projeto, usando `mcr.microsoft.com/dotnet/aspnet:9.0` como imagem
+  base). Também dorme após inatividade no tier gratuito. Boa opção se você já
+  usa Render pra outros projetos ou prefere não criar conta Azure.
+
+Em ambos os casos, a chave da OpenWeatherMap **nunca** vai no código — sempre
+como variável de ambiente/"application setting" configurada no painel do
+provedor, do mesmo jeito que o user-secrets faz localmente.
 
 > Como o banco é EF Core InMemory, os dados **não sobrevivem** a um reinício
 > do processo da `Api` — isso é intencional para o escopo deste exercício.
