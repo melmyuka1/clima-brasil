@@ -34,6 +34,7 @@ public class WeatherController : ControllerBase
     /// <param name="city">Id da cidade (ver <c>GET /api/cities</c>), ex.: "curitiba".</param>
     /// <param name="start">Data inicial do período (yyyy-MM-dd).</param>
     /// <param name="end">Data final do período (yyyy-MM-dd), não pode ser anterior a <paramref name="start"/>.</param>
+    /// <param name="cancellationToken">Token de cancelamento da requisição.</param>
     [HttpGet("data")]
     [ProducesResponseType(typeof(DashboardDataResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
