@@ -31,21 +31,19 @@ de dados (EF Core InMemory) para consulta histórica.
 
 ## Como rodar
 
-A API e o site rodam como dois processos separados — a API precisa estar no
-ar para o site mostrar dados.
-
 ```bash
 dotnet restore
 dotnet user-secrets set "OpenWeatherMap:ApiKey" "SUA_CHAVE_AQUI" --project src/WeatherDashboard.Api
 
-# terminal 1
-dotnet run --project src/WeatherDashboard.Api
-# terminal 2
-dotnet run --project src/WeatherDashboard.Web
+./start.sh      # Linux/macOS/Git Bash
+.\start.ps1     # Windows PowerShell
 ```
 
-Abra `http://localhost:5170` (site) e `http://localhost:5282/swagger` (API).
-Passo a passo completo, configuração da chave de API e deploy:
+O sistema é dois processos (a API que coleta os dados, e o site que os
+exibe) — o script sobe os dois de uma vez e abre o navegador em
+`http://localhost:5170`. O Swagger da API fica em
+`http://localhost:5282/swagger`. Passo a passo completo (inclusive rodar os
+dois manualmente, se preferir) e configuração de deploy:
 [docs/wiki/Instalacao-e-Deploy.md](docs/wiki/Instalacao-e-Deploy.md).
 
 ## Testes

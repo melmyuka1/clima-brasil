@@ -65,7 +65,23 @@ dotnet build
 ```
 
 São **dois processos separados** — a API precisa estar rodando para o site
-mostrar dados. Abra dois terminais:
+mostrar dados. O jeito mais simples é o script que sobe os dois de uma vez:
+
+```bash
+./start.sh      # Linux / macOS / Git Bash
+```
+
+```powershell
+.\start.ps1     # Windows PowerShell
+```
+
+Ele abre a `Api` e o `Web` (cada um numa janela/processo próprio) e, no
+PowerShell, já abre o navegador em `http://localhost:5170`. Pra encerrar,
+feche as janelas abertas (PowerShell) ou aperte Ctrl+C no terminal onde
+rodou (`start.sh`).
+
+Se preferir rodar na mão — útil pra ver os dois logs separados, ou se algo
+no script não bater com seu ambiente — abra dois terminais:
 
 ```bash
 # terminal 1 — API (coleta os dados e os expõe por HTTP)
@@ -122,9 +138,10 @@ Isso gera os artefatos prontos para deploy em `./publish-api` e
 `./publish-web` — dois processos, cada um com sua própria porta/domínio.
 Configure a chave da API no ambiente de destino da `Api` (variável de
 ambiente `OpenWeatherMap__ApiKey`, ou um `appsettings.Production.json` fora
-do controle de versão), e aponte `WeatherApi:BaseUrl` do `Web` para a URL
-pública da `Api` em produção — junto com `Cors:AllowedOrigins` na `Api`
-apontando de volta para a URL pública do `Web`.
+do controle de versão), e aponte `WeatherApi:BaseUrlHttp` / `BaseUrlHttps` do
+`Web` para a URL pública da `Api` em produção — junto com
+`Cors:AllowedOrigins` na `Api` apontando de volta para a URL pública do
+`Web`.
 
 ### Opções de deploy
 
